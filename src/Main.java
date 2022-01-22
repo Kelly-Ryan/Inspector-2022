@@ -1,3 +1,4 @@
+import java.nio.file.FileSystems;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -13,11 +14,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class Main extends Application {
     private static Connection conn = null;
 
-    static Connection dbConnect() throws SQLException {
+    static Connection dbConnect() {
         try {
             Class.forName("org.sqlite.JDBC");
             //create database if it does not already exist and connect to it
@@ -109,20 +111,38 @@ public class Main extends Application {
     }
 
     static void readFile() {
+        //submitted assignment files should be in parent directory named with student ID number
         File file = new File("assignments/CS4023/week03/0347345/copyFile.c");
-        String line = "";
+        //split directories in filepath - "\" for Windows and "/" for Unix/Mac
+        String[] filepath = file.getParentFile().toString().split("[\\\\/]");
+        String moduleCode = filepath[filepath.length-3];
+        //assignmentName could be a week number, e.g. labs
+        String assignmentName = filepath[filepath.length-2];
+        //parent directory of source files named with student ID
+        String studentID = filepath[filepath.length-1];
+
+        //DEBUG
+        for(String s : filepath){
+            System.out.print(s + " ");
+        }
+        System.out.println("\nModule Code: " + moduleCode);
+        System.out.println("Assignment: " + assignmentName);
+        System.out.println("Student ID: " + studentID);
+
         try {
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr);
-            StringBuilder sb = new StringBuilder("");
-            line = br.readLine();
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
 
             while(line != null) {
                 sb.append(line).append("\n");
                 line = br.readLine();
             }
             String fileText = sb.toString();
-            System.out.println(fileText);
+
+            //display file in text area
+            //System.out.println(fileText);
         } catch (IOException e) {
             e.printStackTrace();
         }
