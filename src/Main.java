@@ -1,34 +1,30 @@
-import java.nio.file.FileSystems;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 public class Main extends Application {
     private static Connection conn = null;
 
-    static Connection dbConnect() {
-        try {
-            Class.forName("org.sqlite.JDBC");
-            //create database if it does not already exist and connect to it
-            conn = DriverManager.getConnection("jdbc:sqlite:src/db/inspector.db");
-        } catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-            System.exit(0);
-        }
-        return conn;
+    public static void main(String[] args) {
+        dbSetup();
+        //launch goes into Application and calls start()
+        launch(args);
     }
 
     public static void dbSetup() {
@@ -90,27 +86,19 @@ public class Main extends Application {
         }
     }
 
-    //entry point for JavaFX application
-    @Override
-    public void start(Stage stage) {
-        GridPane gridPane = new GridPane();
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setPercentWidth(25);
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPercentWidth(50);
-        ColumnConstraints col3 = new ColumnConstraints();
-        col3.setPercentWidth(25);
-        gridPane.getColumnConstraints().addAll(col1,col2,col3);
-
-        Scene scene = new Scene(gridPane);
-        stage.setTitle("Inspector");
-        stage.setMaximized(true);
-        //scene.getStylesheets().add("http://font.samples/web?family=samples")
-        stage.setScene(scene);
-        stage.show();
+    static Connection dbConnect() {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            //create database if it does not already exist and connect to it
+            conn = DriverManager.getConnection("jdbc:sqlite:src/db/inspector.db");
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.exit(0);
+        }
+        return conn;
     }
 
-    static void readFile() {
+    static String readFile() {
         //submitted assignment files should be in parent directory named with student ID number
         File file = new File("assignments/CS4023/week03/0347345/copyFile.c");
         //split directories in filepath - "\" for Windows and "/" for Unix/Mac
@@ -129,30 +117,95 @@ public class Main extends Application {
         System.out.println("Assignment: " + assignmentName);
         System.out.println("Student ID: " + studentID);
 
+        StringBuilder sb = new StringBuilder();
+
         try {
             FileReader fr = new FileReader(file);
             BufferedReader br = new BufferedReader(fr);
-            StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 
             while(line != null) {
                 sb.append(line).append("\n");
                 line = br.readLine();
             }
-            String fileText = sb.toString();
 
+
+            //String fileText = sb.toString();
             //display file in text area
             //System.out.println(fileText);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return sb.toString();
     }
 
-    public static void main(String[] args) {
-        dbSetup();
-        readFile();
+    //entry point for JavaFX application
+    @Override
+    public void start(Stage stage) {
+        stage.setMaximized(true);
+        stage.setTitle("Inspector");
+        stage.setOnCloseRequest(e -> {
+            e.consume();
+            exitApplication();
+        });
 
-        //launch standalone application - use Platform.exit() to stop application
-        //launch();
+        //Menu
+        Menu fileMenu = new Menu("File");
+        fileMenu.getItems().add(new MenuItem("Import Files..."));
+        fileMenu.getItems().add(new MenuItem("Export Grades..."));
+        fileMenu.getItems().add(new SeparatorMenuItem());
+        fileMenu.getItems().add(new MenuItem("Settings..."));
+        fileMenu.getItems().add(new SeparatorMenuItem());
+
+        MenuItem exitMenuItem = new MenuItem("Exit");
+        exitMenuItem.setOnAction(e -> exitApplication());
+        fileMenu.getItems().add(exitMenuItem);
+
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().addAll(fileMenu);
+
+        HBox bottomMenu = new HBox();
+        bottomMenu.setMinHeight(100);
+        Label label2 = new Label();
+        Button closeButton = new Button("exit");
+        closeButton.setOnAction(e -> exitApplication());
+        bottomMenu.getChildren().addAll(label2, closeButton);
+        bottomMenu.setAlignment(Pos.CENTER);
+
+        VBox leftMenu = new VBox();
+        leftMenu.setMinWidth(200);
+        Label moduleCodeLabel = new Label("CS4023");
+        Label assignmentNameLabel = new Label("week03");
+        Label studentIDLabel = new Label("0347345");
+        leftMenu.getChildren().addAll(moduleCodeLabel, assignmentNameLabel, studentIDLabel);
+
+        VBox rightMenu = new VBox();
+        rightMenu.setMinWidth(200);
+        Label label4 = new Label("right menu");
+        rightMenu.getChildren().add(label4);
+
+        VBox centreDisplay = new VBox();
+        Label displayAssignment = new Label(readFile());
+        centreDisplay.getChildren().add(displayAssignment);
+
+        BorderPane borderPane = new BorderPane();
+        //Insets(top, right, bottom, left)
+        borderPane.setPadding(new Insets(0, 10, 10, 10 ));
+        borderPane.setTop(menuBar);
+        borderPane.setBottom(bottomMenu);
+        borderPane.setLeft(leftMenu);
+        borderPane.setRight(rightMenu);
+        borderPane.setCenter(centreDisplay);
+
+        Scene scene = new Scene(borderPane);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    void exitApplication() {
+        Boolean instruction = DialogBox.display("Exit Application", "Are you sure you want to exit Inspector?");
+        if(instruction) {
+            Platform.exit();
+        }
     }
 }
