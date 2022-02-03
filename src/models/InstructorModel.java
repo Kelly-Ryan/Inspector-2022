@@ -1,21 +1,15 @@
 package models;
 
 public class InstructorModel {
-    private int instructorId;
     private String name, email, password;
 
     public InstructorModel() {
     }
 
-    public InstructorModel(int instructorId, String name, String email, String password) {
-        this.instructorId = instructorId;
+    public InstructorModel(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
-    }
-
-    public int getInstructorId() {
-        return instructorId;
     }
 
     public String getName() {
@@ -33,9 +27,8 @@ public class InstructorModel {
     @Override
     public String toString() {
         return "InstructorModel{" +
-                "instructorId=" + instructorId +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
+                ", name='" + getName() + '\'' +
+                ", email='" + getEmail() + '\'' +
                 '}';
     }
 }

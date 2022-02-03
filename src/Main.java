@@ -1,13 +1,13 @@
 import java.awt.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.io.*;
+import java.sql.*;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -16,6 +16,8 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -23,27 +25,23 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
+import models.InstructorModel;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 public class Main extends Application {
     private static Connection conn = null;
+    Group logoImageGroup;
     //user should be able to set this at initial set up and amend it when required
-    File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
+    File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\assignments");
     Stage stage = new Stage();
     Text currentSubmissionDisplay = new Text();
-
     String currentModule, currentAssignment, currentStudentID;
     Label currentModuleLabel = new Label();
     Label currentAssignmentLabel = new Label();
     Label currentStudentIDLabel = new Label();
     Label submissionInfoLabel = new Label();
-
     TreeView<File> treeView = new TreeView<>();
 
     public static void main(String[] args) {
@@ -111,7 +109,7 @@ public class Main extends Application {
         //initialize database
         dbSetup();
         //set up JavaFX stage/window
-            stage.getIcons().add(new Image("resources/images/inspector_logo.png")); //set application icon
+        stage.getIcons().add(new Image("resources/images/inspector_logo.png")); //set application icon
         stage.setMaximized(true);
         stage.setTitle("Inspector");
         stage.setOnCloseRequest(e -> {
@@ -119,45 +117,143 @@ public class Main extends Application {
             exitApplication();
         });
 
-        Scene scene = new Scene(createSubmissionView());
+//        Scene scene = new Scene(createSubmissionView());
+        Scene scene = new Scene(createLoginView());
+        scene.getStylesheets().add("css/styles.css");
         stage.setScene(scene);
         stage.show();
+    }
+
+    VBox createLoginView() {
+        VBox loginView = new VBox();
+        loginView.setAlignment(Pos.CENTER);
+        loginView.setSpacing(30);
+        logoImageGroup = new Group(new ImageView(new Image(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("resources/images/inspector logo.png")))));
+
+        //login to existing user account
+        VBox existingAccount = new VBox();
+        existingAccount.setAlignment(Pos.BASELINE_RIGHT);
+        existingAccount.setMaxWidth(350);
+        existingAccount.setSpacing(10);
+        existingAccount.setPadding(new Insets(10));
+
+        Text existingUserText = new Text("Existing User");
+        HBox emailHbox = new HBox();
+        emailHbox.setAlignment(Pos.BASELINE_RIGHT);
+        Label emailLabel = new Label("email: ");
+        TextField emailField = new TextField();
+        emailHbox.getChildren().addAll(emailLabel, emailField);
+
+        HBox passwordHbox = new HBox();
+        passwordHbox.setAlignment(Pos.BASELINE_RIGHT);
+        Label passwordLabel = new Label("password: ");
+        PasswordField passwordField = new PasswordField();
+        passwordHbox.getChildren().addAll(passwordLabel, passwordField);
+        Button loginBtn = new Button("Login");
+        loginBtn.setOnAction(e -> login(emailField.getText(), passwordField.getText()));
+        existingAccount.getChildren().addAll(existingUserText, emailHbox, passwordHbox, loginBtn);
+
+        //register new user account
+        VBox registerAccount = new VBox();
+        registerAccount.setAlignment(Pos.BASELINE_RIGHT);
+        registerAccount.setMaxWidth(350);
+        registerAccount.setSpacing(10);
+        registerAccount.setPadding(new Insets(10));
+
+        Text newUserText = new Text("New User");
+        HBox newUsernameHbox = new HBox();
+        newUsernameHbox.setAlignment(Pos.BASELINE_RIGHT);
+        Label newUsernameLabel = new Label("username: ");
+        TextField newUsernameField = new TextField();
+        newUsernameHbox.getChildren().addAll(newUsernameLabel, newUsernameField);
+
+        HBox newUserEmailHbox = new HBox();
+        newUserEmailHbox.setAlignment(Pos.BASELINE_RIGHT);
+        Label newUserEmailLabel = new Label("email: ");
+        TextField newUserEmailField = new TextField();
+        newUserEmailHbox.getChildren().addAll(newUserEmailLabel, newUserEmailField);
+
+        HBox newPasswordHbox = new HBox();
+        newPasswordHbox.setAlignment(Pos.BASELINE_RIGHT);
+        Label newPasswordLabel = new Label("password: ");
+        PasswordField newPasswordField = new PasswordField();
+        newPasswordHbox.getChildren().addAll(newPasswordLabel, newPasswordField);
+
+        HBox confirmPasswordHbox = new HBox();
+        confirmPasswordHbox.setAlignment(Pos.BASELINE_RIGHT);
+        Label confirmPasswordLabel = new Label ("confirm password: ");
+        PasswordField confirmPasswordField = new PasswordField();
+        confirmPasswordHbox.getChildren().addAll(confirmPasswordLabel, confirmPasswordField);
+
+        Button registerAccBtn = new Button("Register Account");
+        registerAccBtn.setOnAction(e -> registerNewUser(newUsernameField.getText(), newUserEmailField.getText(),
+                newPasswordField.getText(), confirmPasswordField.getText()));
+        registerAccount.getChildren().addAll(newUserText, newUsernameHbox, newUserEmailHbox, newPasswordHbox, confirmPasswordHbox, registerAccBtn);
+
+        loginView.getChildren().addAll(logoImageGroup,existingAccount, registerAccount);
+        return loginView;
+    }
+
+    void registerNewUser(String username, String email, String pw1, String pw2) {
+        if(username.isEmpty() || email.isEmpty() || pw1.isEmpty() || pw2.isEmpty()) {
+            DialogBox.alert("Missing Data", "Please complete all fields.");
+        } else if(!pw1.equals(pw2)) {
+            System.out.println("passwords must be equal");
+            DialogBox.alert("Password Mismatch", "Passwords must be the same.");
+        } else {
+            new InstructorModel(username, email, pw1);
+            Connection conn = dbConnect();
+            String sql = "INSERT INTO INSTRUCTOR (name, email, password) VALUES(?, ?, ?)";
+            try {
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, username);
+                pstmt.setString(2, email);
+                pstmt.setString(3, pw1);
+                pstmt.executeUpdate();
+                conn.close();
+
+                DialogBox.alert("Successful Registration", "Registration completed!\nLogin with your username and password.");
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void login(String username, String password) {
+        if(username.isEmpty() || password.isEmpty()) {
+            DialogBox.alert("Missing Data", "Please complete all fields.");
+        } else {
+            System.out.println(username + "\n" + password);
+        }
     }
 
     void dbSetup() {
         try{
             conn = dbConnect();
-
-            //DEBUG
-            System.out.println("database connection successful");
-
             Statement stmt = conn.createStatement();
             //define database tables
             String sql = "CREATE TABLE IF NOT EXISTS INSTRUCTOR (" +
-                        "instructorId   INT AUTO_INCREMENT," +
+                        "instructorId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
                         "name           VARCHAR(100) NOT NULL," +
                         "email          VARCHAR(100) NOT NULL," +
                         "password       VARCHAR(20)  NOT NULL," +
-                        "PRIMARY KEY (instructorId)," +
                         "UNIQUE (email)" +
                         ");" +
                         "CREATE TABLE IF NOT EXISTS MODULE (" +
-                        "moduleId      INT  AUTO_INCREMENT," +
+                        "moduleId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
                         "moduleCode    VARCHAR(6)  NOT NULL," +
                         "moduleName    VARCHAR(50) NOT NULL," +
-                        "instructorId  INT(10)     NOT NULL REFERENCES INSTRUCTOR(instructorId)," +
-                        "PRIMARY KEY (moduleId)" +
+                        "instructorId  INT(10)     NOT NULL REFERENCES INSTRUCTOR(instructorId)" +
                         ");" +
                         "CREATE TABLE IF NOT EXISTS STUDENT (" +
-                        "studentId  VARCHAR(8)      NOT NULL," +
-                        "PRIMARY KEY (studentId)" +
+                        "studentId  VARCHAR(8) NOT NULL PRIMARY KEY" +
                         "); "+
                         "CREATE TABLE IF NOT EXISTS ASSIGNMENT (" +
-                        "assignmentId   INT AUTO_INCREMENT," +
+                        "assignmentId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
                         "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
                         "academicYear   YEAR    NOT NULL," +
-                        "semester       INT(1)  NOT NULL," +
-                        "PRIMARY KEY (assignmentId)" +
+                        "semester       INT(1)  NOT NULL" +
                         ");" +
                         "CREATE TABLE IF NOT EXISTS ASSIGNMENT_SUBMISSION (" +
                         "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
@@ -167,14 +263,10 @@ public class Main extends Application {
                         "receivedMarks  FLOAT," +
                         "assignmentText MEDIUMTEXT," +
                         "comments       VARCHAR(1000)," +
-                        "PRIMARY KEY (assignmentId)" +
+                        "CONSTRAINT COMP_KEY PRIMARY KEY (assignmentId, moduleId, studentId)" +
                         ");";
             //create database tables
             stmt.executeUpdate(sql);
-
-            //DEBUG
-            System.out.println("tables successfully created");
-
             stmt.close();
             conn.close();
         } catch (Exception e) {
@@ -236,10 +328,9 @@ public class Main extends Application {
         HBox bottomMenu = new HBox();
         bottomMenu.setMinHeight(50);
         bottomMenu.setPadding(new Insets(10));
-        Label label2 = new Label();
         Button closeButton = new Button("exit");
         closeButton.setOnAction(e -> exitApplication());
-        bottomMenu.getChildren().addAll(label2, closeButton);
+        bottomMenu.getChildren().addAll(closeButton);
         bottomMenu.setAlignment(Pos.CENTER);
 
         VBox leftMenu = new VBox();
@@ -305,7 +396,7 @@ public class Main extends Application {
     }
 
     void exitApplication() {
-        Boolean instruction = DialogBox.display("Exit Application", "Are you sure you want to exit Inspector?");
+        Boolean instruction = DialogBox.dialog("Exit Application", "Are you sure you want to close Inspector?");
         if(instruction) {
             Platform.exit();
         }
