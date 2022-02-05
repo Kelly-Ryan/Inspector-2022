@@ -1,13 +1,13 @@
 import java.awt.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.io.*;
+import java.sql.*;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -16,6 +16,8 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -24,85 +26,24 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 public class Main extends Application {
     private static Connection conn = null;
     //user should be able to set this at initial set up and amend it when required
-    File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
-    Stage stage = new Stage();
-    Text currentSubmissionDisplay = new Text();
-
-    String currentModule, currentAssignment, currentStudentID;
-    Label currentModuleLabel = new Label();
-    Label currentAssignmentLabel = new Label();
-    Label currentStudentIDLabel = new Label();
-    Label submissionInfoLabel = new Label();
-
-    TreeView<File> treeView = new TreeView<>();
+    private final File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\assignments");
+    private final Stage stage = new Stage();
+    private final Text currentSubmissionDisplay = new Text();
+    private final Label currentModuleLabel = new Label();
+    private final Label currentAssignmentLabel = new Label();
+    private final Label currentStudentIDLabel = new Label();
+    private final Label submissionInfoLabel = new Label();
+    private final TreeView<File> treeView = new TreeView<>();
 
     public static void main(String[] args) {
-        //launch goes into Application and calls start()
+        //launch calls start() from Application class
         launch(args);
-    }
-
-    void displayFileTree(File inputDirectoryLocation) {
-        //create root item
-        TreeItem<File> rootItem = new TreeItem<>(inputDirectoryLocation);
-        //hide root item of treeview
-        treeView.setShowRoot(false);
-        treeView.setRoot(rootItem);
-
-        //create cell factory to render tree cells
-        //treeView.setCellFactory(CheckBoxTreeCell.forTreeView());
-
-        treeView.setCellFactory(treeView -> {
-            TreeCell<File> cell = new TreeCell<>() {
-                @Override
-                public void updateItem(File file, boolean empty) {
-                    super.updateItem(file, empty) ;
-                    if (empty) {
-                        setText(null);
-                    } else {
-                        setText(file.getName());
-                    }
-                }
-            };
-            cell.setOnMouseClicked(event -> {
-                if (!cell.isEmpty()) {
-                    //TODO display submission on click
-                    TreeItem<File> treeItem = cell.getTreeItem();
-                    System.out.println(treeItem.getValue());
-                }
-            });
-            return cell ;
-        });
-
-        //get file list from importDirectory
-        File[] fileList = inputDirectoryLocation.listFiles();
-
-        //populate tree
-        assert fileList != null;
-        for (File file : fileList) {
-            createFileTree(file, rootItem);
-        }
-    }
-
-    void createFileTree(File file, TreeItem<File> parent) {
-        //create a new tree item with the file name and add it to parent
-        TreeItem<File> fileItem = new TreeItem<>(new File(file.getName()));
-        parent.getChildren().add(fileItem);
-        //if this file is a directory then call this method on each file inside the directory
-        if (file.isDirectory()) {
-            for (File f : Objects.requireNonNull(file.listFiles())) {
-                createFileTree(f, fileItem);
-            }
-        }
     }
 
     //entry point for JavaFX application
@@ -111,7 +52,7 @@ public class Main extends Application {
         //initialize database
         dbSetup();
         //set up JavaFX stage/window
-            stage.getIcons().add(new Image("resources/images/inspector_logo.png")); //set application icon
+        stage.getIcons().add(new Image("resources/images/inspector_logo.png")); //set application icon
         stage.setMaximized(true);
         stage.setTitle("Inspector");
         stage.setOnCloseRequest(e -> {
@@ -119,7 +60,9 @@ public class Main extends Application {
             exitApplication();
         });
 
-        Scene scene = new Scene(createSubmissionView());
+        //Scene scene = createSubmissionView();
+        Scene scene = createLoginScene();
+        scene.getStylesheets().add("css/styles.css");
         stage.setScene(scene);
         stage.show();
     }
@@ -127,54 +70,42 @@ public class Main extends Application {
     void dbSetup() {
         try{
             conn = dbConnect();
-
-            //DEBUG
-            System.out.println("database connection successful");
-
             Statement stmt = conn.createStatement();
             //define database tables
             String sql = "CREATE TABLE IF NOT EXISTS INSTRUCTOR (" +
-                        "instructorId   INT AUTO_INCREMENT," +
-                        "name           VARCHAR(100) NOT NULL," +
-                        "email          VARCHAR(100) NOT NULL," +
-                        "password       VARCHAR(20)  NOT NULL," +
-                        "PRIMARY KEY (instructorId)," +
-                        "UNIQUE (email)" +
-                        ");" +
-                        "CREATE TABLE IF NOT EXISTS MODULE (" +
-                        "moduleId      INT  AUTO_INCREMENT," +
-                        "moduleCode    VARCHAR(6)  NOT NULL," +
-                        "moduleName    VARCHAR(50) NOT NULL," +
-                        "instructorId  INT(10)     NOT NULL REFERENCES INSTRUCTOR(instructorId)," +
-                        "PRIMARY KEY (moduleId)" +
-                        ");" +
-                        "CREATE TABLE IF NOT EXISTS STUDENT (" +
-                        "studentId  VARCHAR(8)      NOT NULL," +
-                        "PRIMARY KEY (studentId)" +
-                        "); "+
-                        "CREATE TABLE IF NOT EXISTS ASSIGNMENT (" +
-                        "assignmentId   INT AUTO_INCREMENT," +
-                        "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
-                        "academicYear   YEAR    NOT NULL," +
-                        "semester       INT(1)  NOT NULL," +
-                        "PRIMARY KEY (assignmentId)" +
-                        ");" +
-                        "CREATE TABLE IF NOT EXISTS ASSIGNMENT_SUBMISSION (" +
-                        "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
-                        "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
-                        "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
-                        "maxMarks       FLOAT," +
-                        "receivedMarks  FLOAT," +
-                        "assignmentText MEDIUMTEXT," +
-                        "comments       VARCHAR(1000)," +
-                        "PRIMARY KEY (assignmentId)" +
-                        ");";
+                    "instructorId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                    "name           VARCHAR(100) NOT NULL," +
+                    "email          VARCHAR(100) NOT NULL," +
+                    "password       VARCHAR(20)  NOT NULL," +
+                    "UNIQUE (email)" +
+                    ");" +
+                    "CREATE TABLE IF NOT EXISTS MODULE (" +
+                    "moduleId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                    "moduleCode    VARCHAR(6)  NOT NULL," +
+                    "moduleName    VARCHAR(50) NOT NULL," +
+                    "instructorId  INT(10)     NOT NULL REFERENCES INSTRUCTOR(instructorId)" +
+                    ");" +
+                    "CREATE TABLE IF NOT EXISTS STUDENT (" +
+                    "studentId  VARCHAR(8) NOT NULL PRIMARY KEY" +
+                    "); "+
+                    "CREATE TABLE IF NOT EXISTS ASSIGNMENT (" +
+                    "assignmentId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+                    "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
+                    "academicYear   YEAR    NOT NULL," +
+                    "semester       INT(1)  NOT NULL" +
+                    ");" +
+                    "CREATE TABLE IF NOT EXISTS ASSIGNMENT_SUBMISSION (" +
+                    "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
+                    "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
+                    "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
+                    "maxMarks       FLOAT," +
+                    "receivedMarks  FLOAT," +
+                    "assignmentText MEDIUMTEXT," +
+                    "comments       VARCHAR(1000)," +
+                    "CONSTRAINT COMP_KEY PRIMARY KEY (assignmentId, moduleId, studentId)" +
+                    ");";
             //create database tables
             stmt.executeUpdate(sql);
-
-            //DEBUG
-            System.out.println("tables successfully created");
-
             stmt.close();
             conn.close();
         } catch (Exception e) {
@@ -193,6 +124,179 @@ public class Main extends Application {
             System.exit(0);
         }
         return conn;
+    }
+
+    Scene createLoginScene() {
+        Group logoImageGroup = new Group(new ImageView(new Image(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("resources/images/inspector logo.png")))));
+
+        //login to existing user account
+        Label emailLabel = new Label("EMAIL ");
+        Label passwordLabel = new Label("PASSWORD ");
+        Label emptyLabel1 = new Label();
+        VBox existingAccLabels = new VBox(emailLabel, passwordLabel, emptyLabel1);
+        existingAccLabels.setAlignment(Pos.CENTER_RIGHT);
+        existingAccLabels.setPadding(new Insets(10));
+        existingAccLabels.setSpacing(20);
+
+        TextField emailField = new TextField();
+        PasswordField passwordField = new PasswordField();
+        Button loginBtn = new Button("LOGIN");
+        loginBtn.setOnAction(e -> login(emailField.getText(), passwordField.getText()));
+        HBox loginBtnContainer = new HBox(loginBtn);
+        loginBtnContainer.setAlignment(Pos.CENTER_RIGHT);
+        VBox existingAccFields = new VBox(emailField, passwordField, loginBtnContainer);
+        existingAccFields.setAlignment(Pos.CENTER_RIGHT);
+        existingAccFields.setSpacing(10);
+        HBox existingAccLabelsAndFields = new HBox(existingAccLabels, existingAccFields);
+        existingAccLabelsAndFields.setAlignment(Pos.CENTER);
+
+        VBox existingAccount = new VBox(existingAccLabelsAndFields);
+        existingAccount.setAlignment(Pos.TOP_CENTER);
+        existingAccount.setSpacing(10);
+
+        //register new user account
+        Label newUsernameLabel = new Label("USERNAME");
+        Label newUserEmailLabel = new Label("EMAIL");
+        Label newPasswordLabel = new Label("PASSWORD");
+        Label confirmPasswordLabel = new Label ("CONFIRM PASSWORD");
+        Label emptyLabel2 = new Label();
+        VBox newUserLabels = new VBox(newUsernameLabel, newUserEmailLabel, newPasswordLabel, confirmPasswordLabel, emptyLabel2);
+        newUserLabels.setAlignment(Pos.CENTER_RIGHT);
+        newUserLabels.setPadding(new Insets(10));
+        newUserLabels.setSpacing(20);
+
+        TextField newUsernameField = new TextField();
+        TextField newUserEmailField = new TextField();
+        PasswordField newPasswordField = new PasswordField();
+        PasswordField confirmPasswordField = new PasswordField();
+        Button registerAccBtn = new Button("REGISTER");
+        registerAccBtn.setOnAction(e -> registerNewUser(newUsernameField.getText(), newUserEmailField.getText(),
+                newPasswordField.getText(), confirmPasswordField.getText()));
+        HBox regBtnContainer = new HBox(registerAccBtn);
+        regBtnContainer.setAlignment(Pos.CENTER_RIGHT);
+        VBox newUserFields = new VBox(newUsernameField, newUserEmailField, newPasswordField, confirmPasswordField, regBtnContainer);
+        newUserFields.setAlignment(Pos.CENTER_RIGHT);
+        newUserFields.setSpacing(10);
+
+        HBox newUserLabelsAndFields = new HBox(newUserLabels, newUserFields);
+        newUserLabelsAndFields.setAlignment(Pos.CENTER);
+
+        VBox registerAccount = new VBox(newUserLabelsAndFields);
+        registerAccount.setAlignment(Pos.TOP_CENTER);
+        registerAccount.setSpacing(10);
+
+        HBox loginHbox = new HBox(existingAccount, registerAccount);
+        loginHbox.setAlignment(Pos.CENTER);
+        loginHbox.setSpacing(20);
+        VBox loginView = new VBox(logoImageGroup,loginHbox);
+        loginView.setAlignment(Pos.CENTER);
+        loginView.setSpacing(30);
+
+        return new Scene(loginView);
+    }
+
+    void login(String emailAddress, String password) {
+        if(emailAddress.isEmpty() || password.isEmpty()) {
+            DialogBox.alert("Missing Data", "Please complete all fields.");
+        } else {
+            conn = dbConnect();
+            String sql = "SELECT password FROM INSTRUCTOR WHERE email = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, emailAddress);
+                ResultSet rs = pstmt.executeQuery();
+                if(rs.isClosed()) {
+                    DialogBox.alert("Login Unsuccessful", "No account with that email address.\nPlease register and try again.");
+                }
+                else {
+                    String storedPassword = rs.getString(1);
+                    if(password.equals(storedPassword)) {
+                        DialogBox.alert("Login", "Login successful!");
+                        //load instructor dashboard
+
+                    } else {
+                        DialogBox.alert("Error", "Password incorrect. Please try again.");
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void registerNewUser(String username, String email, String pw1, String pw2) {
+        if(username.isEmpty() || email.isEmpty() || pw1.isEmpty() || pw2.isEmpty()) {
+            DialogBox.alert("Missing Data", "Please complete all fields.");
+        } else if(!pw1.equals(pw2)) {
+            System.out.println("passwords must be equal");
+            DialogBox.alert("Password Mismatch", "Passwords must be the same.");
+        } else {
+            //check if user is already registered
+            Connection conn = dbConnect();
+            String existingUserCheck = "SELECT 1 FROM INSTRUCTOR WHERE email = ?";
+            String insertNewUser = "INSERT INTO INSTRUCTOR (name, email, password) VALUES(?, ?, ?)";
+
+            try (PreparedStatement ps1 = conn.prepareStatement(existingUserCheck)) {
+                ps1.setString(1, email);
+                ResultSet rs = ps1.executeQuery();
+                if (rs.isClosed()) {
+                    try {
+                        PreparedStatement ps2 = conn.prepareStatement(insertNewUser);
+                        ps2.setString(1, username);
+                        ps2.setString(2, email);
+                        ps2.setString(3, pw1);
+                        ps2.executeUpdate();
+                        conn.close();
+                        DialogBox.alert("Successful Registration", "Registration completed!\nLogin with your username and password.");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    conn.close();
+                    DialogBox.alert("Error", "A user with this email address is already registered.\nUse this email address to login or register with a different email address.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    Scene createSubmissionScene() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double screenWidth = screenSize.getWidth();
+
+        //set content layout
+        Button closeButton = new Button("exit");
+        closeButton.setOnAction(e -> exitApplication());
+        HBox bottomMenu = new HBox(closeButton);
+        bottomMenu.setMinHeight(50);
+        bottomMenu.setPadding(new Insets(10));
+        bottomMenu.setSpacing(20);
+        bottomMenu.setAlignment(Pos.CENTER);
+
+        displayFileTree(importDirectory);
+        VBox leftMenu = new VBox(currentModuleLabel, currentAssignmentLabel, currentStudentIDLabel, treeView);
+        leftMenu.setMinWidth(screenWidth * 0.15);
+        leftMenu.setPadding(new Insets(10));
+
+        VBox centreDisplay = new VBox(submissionInfoLabel, currentSubmissionDisplay);
+        centreDisplay.setMinWidth(screenWidth * 0.5);
+        centreDisplay.setPadding(new Insets(10));  //Insets(top, right, bottom, left)
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(centreDisplay);
+
+        Label label4 = new Label("right menu");
+        VBox rightMenu = new VBox(label4);
+        rightMenu.setMinWidth(screenWidth * 0.2);
+        rightMenu.setPadding(new Insets(10));
+
+        BorderPane borderPane = new BorderPane();
+        borderPane.setTop(createMenuBar());
+        borderPane.setBottom(bottomMenu);
+        borderPane.setLeft(leftMenu);
+        borderPane.setCenter(scrollPane);
+        borderPane.setRight(rightMenu);
+
+        return new Scene(borderPane);
     }
 
     MenuBar createMenuBar() {
@@ -228,58 +332,69 @@ public class Main extends Application {
         return menuBar;
     }
 
-    BorderPane createSubmissionView() {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        double screenWidth = screenSize.getWidth();
+    void displayFileTree(File inputDirectoryLocation) {
+        //create root item
+        TreeItem<File> rootItem = new TreeItem<>(inputDirectoryLocation);
+        //hide root item of treeview
+        treeView.setShowRoot(false);
+        treeView.setRoot(rootItem);
 
-        //set content layout
-        HBox bottomMenu = new HBox();
-        bottomMenu.setMinHeight(50);
-        bottomMenu.setPadding(new Insets(10));
-        Label label2 = new Label();
-        Button closeButton = new Button("exit");
-        closeButton.setOnAction(e -> exitApplication());
-        bottomMenu.getChildren().addAll(label2, closeButton);
-        bottomMenu.setAlignment(Pos.CENTER);
+        //create cell factory to render tree cells
+        //treeView.setCellFactory(CheckBoxTreeCell.forTreeView());
 
-        VBox leftMenu = new VBox();
-        leftMenu.setMinWidth(screenWidth * 0.15);
-        leftMenu.setPadding(new Insets(10));
-        displayFileTree(importDirectory);
-        leftMenu.getChildren().addAll(currentModuleLabel, currentAssignmentLabel, currentStudentIDLabel, treeView);
+        treeView.setCellFactory(treeView -> {
+            TreeCell<File> cell = new TreeCell<>() {
+                @Override
+                public void updateItem(File file, boolean empty) {
+                    super.updateItem(file, empty) ;
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(file.getName());
+                    }
+                }
+            };
+            cell.setOnMouseClicked(event -> {
+                if (!cell.isEmpty()) {
+                    //display submission on click
+                    TreeItem<File> treeItem = cell.getTreeItem();
+                    System.out.println(treeItem.getValue());
+                }
+            });
+            return cell ;
+        });
 
-        VBox centreDisplay = new VBox();
-        centreDisplay.setMinWidth(screenWidth * 0.5);
-        centreDisplay.setPadding(new Insets(10));  //Insets(top, right, bottom, left)
-        centreDisplay.getChildren().addAll(submissionInfoLabel, currentSubmissionDisplay);
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(centreDisplay);
+        //get file list from importDirectory
+        File[] fileList = inputDirectoryLocation.listFiles();
 
-        VBox rightMenu = new VBox();
-        rightMenu.setMinWidth(screenWidth * 0.2);
-        rightMenu.setPadding(new Insets(10));
-        Label label4 = new Label("right menu");
-        rightMenu.getChildren().add(label4);
+        //populate tree
+        assert fileList != null;
+        for (File file : fileList) {
+            createFileTree(file, rootItem);
+        }
+    }
 
-        BorderPane borderPane = new BorderPane();
-        borderPane.setTop(createMenuBar());
-        borderPane.setBottom(bottomMenu);
-        borderPane.setLeft(leftMenu);
-        borderPane.setCenter(scrollPane);
-        borderPane.setRight(rightMenu);
-
-        return borderPane;
+    void createFileTree(File file, TreeItem<File> parent) {
+        //create a new tree item with the file name and add it to parent
+        TreeItem<File> fileItem = new TreeItem<>(new File(file.getName()));
+        parent.getChildren().add(fileItem);
+        //if this file is a directory then call this method on each file inside the directory
+        if (file.isDirectory()) {
+            for (File f : Objects.requireNonNull(file.listFiles())) {
+                createFileTree(f, fileItem);
+            }
+        }
     }
 
     //submitted assignment files should be in parent directory named with student ID number
     String readFile(File file) {
         //split directories in filepath - "\" for Windows and "/" for Unix/Mac
         String[] filepath = file.getParentFile().toString().split("[\\\\/]");
-        currentModule = filepath[filepath.length-3];
+        String currentModule = filepath[filepath.length - 3];
         //assignmentName could be a week number, e.g. labs
-        currentAssignment = filepath[filepath.length-2];
+        String currentAssignment = filepath[filepath.length - 2];
         //parent directory of source files named with student ID
-        currentStudentID = filepath[filepath.length-1];
+        String currentStudentID = filepath[filepath.length - 1];
 
         //set labels
         currentModuleLabel.setText("Module: " + currentModule);
@@ -305,7 +420,7 @@ public class Main extends Application {
     }
 
     void exitApplication() {
-        Boolean instruction = DialogBox.display("Exit Application", "Are you sure you want to exit Inspector?");
+        Boolean instruction = DialogBox.dialog("Exit Application", "Are you sure you want to close Inspector?");
         if(instruction) {
             Platform.exit();
         }
