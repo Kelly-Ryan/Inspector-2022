@@ -1,36 +1,38 @@
 .root {
-    -fx-background-color: "#d6e6f2";
-    -fx-font-family: sans-serif;
+    -fx-background-color: #d6e6f2;
+    -fx-font-family: Calibri sans-serif;
     -fx-font-size: 14;
     -fx-text-fill: #283747;
 }
 
 .label{
-    -fx-text-fill: #283747;
+    /*-fx-text-fill: #283747;*/
+    -fx-text-fill: #154360;
 }
 
 .button{
     -fx-background-color: linear-gradient(#b9d7ea, #85B1E4);
     -fx-text-fill: #283747;
-
 }
 
-.root.popup {
-    /* declarations */
+.text{
+    -fx-alignment: center;
+    -fx-text-fill: #283747;
 }
 
+.vbox {
+    -fx-border-color: #000000;
+    -fx-border-width: 1px;
+}
 
-/*.first-color {*/
-/*    background: #f7fbfc;*/
-/*}*/
+.hbox {
+    -fx-border-color: #000000;
+    -fx-border-width: 1px;
+}
 
-/*.second-color {*/
-/*    background: #d6e6f2;*/
-/*}*/
-
-/*.third-color {*/
-/*    background: #b9d7ea;*/
-/*}*/
-
-/*.fourth-color {*/
-/*    background: #769fcd;*/
+/*colour palette*/
+/*#f7fbfc*/
+/*#d6e6f2*/
+/*#b9d7ea*/
+/*#769fcd*/
+/*#154360*/

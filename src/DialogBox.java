@@ -52,18 +52,17 @@ public class DialogBox {
         Stage stage = new Stage();
         stage.getIcons().add(new Image("resources/images/inspector_logo.png"));
         stage.setTitle(title);
-        stage.setMinWidth(350);
-        stage.setMinHeight(150);
+        stage.setMinWidth(600);
+        stage.setMinHeight(200);
         stage.initModality(Modality.APPLICATION_MODAL);
 
         Label messageText = new Label(text);
         Button actionButton = new Button("Close");
         actionButton.setOnAction(e -> stage.close());
 
-        VBox layout = new VBox();
+        VBox layout = new VBox(messageText, actionButton);
         layout.setAlignment(Pos.CENTER);
         layout.setSpacing(20);
-        layout.getChildren().addAll(messageText, actionButton);
         Scene scene = new Scene(layout);
         stage.setScene(scene);
         stage.showAndWait();
