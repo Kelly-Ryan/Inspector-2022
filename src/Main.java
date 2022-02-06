@@ -5,9 +5,11 @@ import java.sql.*;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -46,12 +48,22 @@ public class Main extends Application {
         launch(args);
     }
 
+//    @Override
+//    public void start(Stage stage) throws Exception {
+//        Parent root = FXMLLoader.load(getClass().getResource("views/SampleView.fxml"));
+//        stage.setTitle("Hello World");
+//        stage.setMaximized(true);
+//        stage.setScene(new Scene(root));
+//        stage.show();
+//    }
+
     //entry point for JavaFX application
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws Exception {
         //initialize database
         dbSetup();
         //set up JavaFX stage/window
+    Parent root = FXMLLoader.load(getClass().getResource("views/LoginView.fxml"));
         stage.getIcons().add(new Image("resources/images/inspector_logo.png")); //set application icon
         stage.setMaximized(true);
         stage.setTitle("Inspector");
@@ -60,9 +72,10 @@ public class Main extends Application {
             exitApplication();
         });
 
-        //Scene scene = createSubmissionView();
-        Scene scene = createLoginScene();
-        scene.getStylesheets().add("css/styles.css");
+        Scene scene = new Scene(root);
+        //Scene scene = createSubmissionScene();
+        //Scene scene = createLoginScene();
+        scene.getStylesheets().add("resources/css/styles.css");
         stage.setScene(scene);
         stage.show();
     }
