@@ -1,19 +1,33 @@
 package controllers;
 
-import javafx.geometry.Pos;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class DialogBoxController {
-    static boolean instruction;
+import java.io.IOException;
 
-    public static Boolean dialog(String title, String text) {
+public class DialogBoxController {
+    private static boolean instruction;
+    @FXML private Button confirmButton = new Button();
+    @FXML private Button cancelButton = new Button();
+    @FXML private static Button actionButton = new Button();
+    @FXML private static Text messageText = new Text();
+    @FXML private Parent parent;
+
+    @FXML
+    public Boolean dialog(String title, String text) {
+        try {
+            parent = new FXMLLoader(getClass().getResource("/views/DialogView.fxml")).load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Stage stage = new Stage();
         stage.getIcons().add(new Image("resources/images/inspector_logo.png"));
         stage.setTitle(title);
@@ -22,13 +36,8 @@ public class DialogBoxController {
         //Defines a modal window that blocks events from being delivered to any other application window.
         stage.initModality(Modality.APPLICATION_MODAL);
 
-        Label messageText = new Label(text);
-        Button confirmButton = new Button("Confirm");
-        Button cancelButton = new Button("Cancel");
+        messageText.setText(text);
 
-        HBox buttonContainer = new HBox();
-        buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.setSpacing(20);
         confirmButton.setOnAction(e -> {
             instruction = true;
             stage.close();
@@ -37,12 +46,8 @@ public class DialogBoxController {
             instruction = false;
             stage.close();
         });
-        buttonContainer.getChildren().addAll(confirmButton, cancelButton);
 
-        VBox layout = new VBox(15);
-        layout.getChildren().addAll(messageText, buttonContainer);
-        layout.setAlignment(Pos.CENTER);
-        Scene scene = new Scene(layout);
+        Scene scene = new Scene(parent);
         stage.setScene(scene);
         //Shows this stage and waits for it to be hidden (closed) before returning to the caller.
         stage.showAndWait();
@@ -50,23 +55,19 @@ public class DialogBoxController {
         return instruction;
     }
 
-    public static void alert(String title, String text) {
-        Stage stage = new Stage();
-        stage.getIcons().add(new Image("resources/images/inspector_logo.png"));
-        stage.setTitle(title);
-        stage.setMinWidth(600);
-        stage.setMinHeight(200);
-        stage.initModality(Modality.APPLICATION_MODAL);
-
-        Label messageText = new Label(text);
-        Button actionButton = new Button("Close");
-        actionButton.setOnAction(e -> stage.close());
-
-        VBox layout = new VBox(messageText, actionButton);
-        layout.setAlignment(Pos.CENTER);
-        layout.setSpacing(20);
-        Scene scene = new Scene(layout);
-        stage.setScene(scene);
-        stage.showAndWait();
+    static void alert(String title, String text) {
+//        Stage stage = new Stage();
+//        stage.getIcons().add(new Image("resources/images/inspector_logo.png"));
+//        stage.setTitle(title);
+//        stage.setMinWidth(600);
+//        stage.setMinHeight(200);
+//        stage.initModality(Modality.APPLICATION_MODAL);
+//
+//        messageText.setText(text);
+//        actionButton.setOnAction(e -> stage.close());
+//
+//        Scene scene = new Scene(layout);
+//        stage.setScene(scene);
+//        stage.showAndWait();
     }
 }

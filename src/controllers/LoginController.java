@@ -1,18 +1,33 @@
 package controllers;
 
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
+
 import java.sql.*;
 
 public class LoginController {
     Connection conn;
+    @FXML private TextField loginEmailField;
+    @FXML private TextField loginPasswordField;
+    @FXML private TextField registerUsernameField;
+    @FXML private TextField registerEmailField;
+    @FXML private TextField registerPasswordField;
+    @FXML private TextField registerConfirmPasswordField;
 
-    void login(String emailAddress, String password) {
-        if(emailAddress.isEmpty() || password.isEmpty()) {
-            DialogBoxController.alert("Missing Data", "Please complete all fields.");
+    @FXML
+    void login(ActionEvent actionEvent) {
+        AlertController alertController = new AlertController();
+        String email = loginEmailField.getText();
+        String password = loginPasswordField.getText();
+        if(email.isEmpty() || password.isEmpty()) {
+            alertController.displayAlert(alertController.missingData());
+            //DialogBoxController.alert("Missing Data", "Please complete all fields.");
         } else {
             conn = DatabaseController.dbConnect();
             String sql = "SELECT password FROM INSTRUCTOR WHERE email = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, emailAddress);
+                pstmt.setString(1, email);
                 ResultSet rs = pstmt.executeQuery();
                 if(rs.isClosed()) {
                     DialogBoxController.alert("Login Unsuccessful", "No account with that email address.\nPlease register and try again.");
@@ -20,23 +35,34 @@ public class LoginController {
                 else {
                     String storedPassword = rs.getString(1);
                     if(password.equals(storedPassword)) {
-                        DialogBoxController.alert("Login", "Login successful!");
+                        loginEmailField.setText(null);
+                        loginPasswordField.setText(null);
+                        DialogBoxController dc = new DialogBoxController();
+                        dc.dialog("Login", "Login successful!");
                         //load instructor dashboard
 
                     } else {
-                        DialogBoxController.alert("Error", "Password incorrect. Please try again.");
+                        DialogBoxController dc = new DialogBoxController();
+                        dc.dialog("Error", "Password incorrect. Please try again.");
                     }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+        actionEvent.consume();
     }
 
-    void registerNewUser(String username, String email, String pw1, String pw2) {
-        if(username.isEmpty() || email.isEmpty() || pw1.isEmpty() || pw2.isEmpty()) {
+    @FXML
+    void registerNewUser(ActionEvent actionEvent) {
+        String username = registerUsernameField.getText();
+        String email = registerEmailField.getText();
+        String password = registerPasswordField.getText();
+        String confirmPassword = registerConfirmPasswordField.getText();
+
+        if(username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             DialogBoxController.alert("Missing Data", "Please complete all fields.");
-        } else if(!pw1.equals(pw2)) {
+        } else if(!password.equals(confirmPassword)) {
             System.out.println("passwords must be equal");
             DialogBoxController.alert("Password Mismatch", "Passwords must be the same.");
         } else {
@@ -53,9 +79,15 @@ public class LoginController {
                         PreparedStatement ps2 = conn.prepareStatement(insertNewUser);
                         ps2.setString(1, username);
                         ps2.setString(2, email);
-                        ps2.setString(3, pw1);
+                        ps2.setString(3, password);
                         ps2.executeUpdate();
                         conn.close();
+
+                        registerUsernameField.setText(null);
+                        registerEmailField.setText(null);
+                        registerPasswordField.setText(null);
+                        registerConfirmPasswordField.setText(null);
+
                         DialogBoxController.alert("Successful Registration", "Registration completed!\nLogin with your username and password.");
                     } catch (SQLException e) {
                         e.printStackTrace();
