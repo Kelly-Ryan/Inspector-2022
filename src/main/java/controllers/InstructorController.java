@@ -1,11 +1,11 @@
 package controllers;
 
 import models.InstructorModel;
-import views.InstructorView;
+//import views.InstructorView;
 
 public class InstructorController {
     private InstructorModel instructor;
-    private InstructorView instructorView;
+    //private InstructorView instructorView;
 
     void changePassword() {
 

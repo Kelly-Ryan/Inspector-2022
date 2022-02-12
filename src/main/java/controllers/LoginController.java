@@ -8,6 +8,7 @@ import java.sql.*;
 
 public class LoginController {
     Connection conn;
+    AlertController alertController = new AlertController();
     @FXML private TextField loginEmailField;
     @FXML private TextField loginPasswordField;
     @FXML private TextField registerUsernameField;
@@ -17,12 +18,11 @@ public class LoginController {
 
     @FXML
     void login(ActionEvent actionEvent) {
-        AlertController alertController = new AlertController();
+        actionEvent.consume();
         String email = loginEmailField.getText();
         String password = loginPasswordField.getText();
         if(email.isEmpty() || password.isEmpty()) {
             alertController.displayAlert(alertController.missingData());
-            //DialogBoxController.alert("Missing Data", "Please complete all fields.");
         } else {
             conn = DatabaseController.dbConnect();
             String sql = "SELECT password FROM INSTRUCTOR WHERE email = ?";
@@ -30,41 +30,38 @@ public class LoginController {
                 pstmt.setString(1, email);
                 ResultSet rs = pstmt.executeQuery();
                 if(rs.isClosed()) {
-                    DialogBoxController.alert("Login Unsuccessful", "No account with that email address.\nPlease register and try again.");
+                    alertController.displayAlert(alertController.userNotFound());
                 }
                 else {
                     String storedPassword = rs.getString(1);
                     if(password.equals(storedPassword)) {
                         loginEmailField.setText(null);
                         loginPasswordField.setText(null);
-                        DialogBoxController dc = new DialogBoxController();
-                        dc.dialog("Login", "Login successful!");
+                        alertController.displayAlert(alertController.loginSuccess());
                         //load instructor dashboard
-
                     } else {
-                        DialogBoxController dc = new DialogBoxController();
-                        dc.dialog("Error", "Password incorrect. Please try again.");
+                        alertController.displayAlert(alertController.incorrectPassword());
                     }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        actionEvent.consume();
     }
 
     @FXML
     void registerNewUser(ActionEvent actionEvent) {
+        actionEvent.consume();
         String username = registerUsernameField.getText();
         String email = registerEmailField.getText();
         String password = registerPasswordField.getText();
         String confirmPassword = registerConfirmPasswordField.getText();
 
+        //check all fields completed
         if(username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            DialogBoxController.alert("Missing Data", "Please complete all fields.");
+            alertController.displayAlert(alertController.missingData());
         } else if(!password.equals(confirmPassword)) {
-            System.out.println("passwords must be equal");
-            DialogBoxController.alert("Password Mismatch", "Passwords must be the same.");
+            alertController.displayAlert(alertController.passwordMismatch());
         } else {
             //check if user is already registered
             Connection conn = DatabaseController.dbConnect();
@@ -87,14 +84,13 @@ public class LoginController {
                         registerEmailField.setText(null);
                         registerPasswordField.setText(null);
                         registerConfirmPasswordField.setText(null);
-
-                        DialogBoxController.alert("Successful Registration", "Registration completed!\nLogin with your username and password.");
+                        alertController.displayAlert(alertController.registrationSuccess());
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
                 } else {
                     conn.close();
-                    DialogBoxController.alert("Error", "A user with this email address is already registered.\nUse this email address to login or register with a different email address.");
+                    alertController.displayAlert(alertController.userExists());
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
