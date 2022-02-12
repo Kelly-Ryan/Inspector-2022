@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<VBox id="vBox" fx:id="vBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DialogController">
+   <children>
+      <Text id="messageText" fx:id="messageText" strokeType="OUTSIDE" strokeWidth="1.0" />
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="40.0">
+         <children>
+            <Button id="confirmButton" fx:id="confirmButton" mnemonicParsing="false" onAction="#closeProgram" text="Confirm" />
+            <Button id="cancelButton" fx:id="cancelButton" mnemonicParsing="false" onAction="#closeDialog" text="Cancel" />
+         </children>
+      </HBox>
+   </children>
+</VBox>
