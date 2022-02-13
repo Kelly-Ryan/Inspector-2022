@@ -1,5 +1,6 @@
 import controllers.DialogController;
 import javafx.application.Application;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -33,8 +34,7 @@ public class Main extends Application {
         DatabaseController.dbSetup();
 
         //set up JavaFX stage/window
-        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("views/LoginView.fxml")));
-        Parent root = loader.load();
+        Parent root = new FXMLLoader(Objects.requireNonNull(getClass().getResource("views/LoginView.fxml"))).load();
         stage.getIcons().add(new Image("/images/inspector_logo.png")); //set application icon
         stage.setMaximized(true);
         stage.setTitle("Inspector");
@@ -48,7 +48,8 @@ public class Main extends Application {
         stage.show();
     }
 
-    private void exitApplication() {
+    @FXML
+    public void exitApplication() {
         DialogController dialogController = new DialogController();
         dialogController.displayDialog(dialogController.closeProgram());
     }

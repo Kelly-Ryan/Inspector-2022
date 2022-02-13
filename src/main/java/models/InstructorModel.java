@@ -3,9 +3,13 @@ package models;
 public class InstructorModel {
     private String name, email, password;
 
-    public InstructorModel() {
+    //called when existing user logs in
+    public InstructorModel(String name, String email) {
+        this.name = name;
+        this.email = email;
     }
 
+    //called when new user is registered
     public InstructorModel(String name, String email, String password) {
         this.name = name;
         this.email = email;
@@ -18,17 +22,5 @@ public class InstructorModel {
 
     public String getEmail() {
         return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String toString() {
-        return "InstructorModel{" +
-                ", name='" + getName() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                '}';
     }
 }

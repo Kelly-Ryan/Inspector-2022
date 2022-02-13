@@ -2,9 +2,16 @@ package controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import models.InstructorModel;
 
+import java.io.IOException;
 import java.sql.*;
+import java.util.Objects;
 
 public class LoginController {
     Connection conn;
@@ -25,7 +32,7 @@ public class LoginController {
             alertController.displayAlert(alertController.missingData());
         } else {
             conn = DatabaseController.dbConnect();
-            String sql = "SELECT password FROM INSTRUCTOR WHERE email = ?";
+            String sql = "SELECT password, name FROM INSTRUCTOR WHERE email = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, email);
                 ResultSet rs = pstmt.executeQuery();
@@ -34,16 +41,23 @@ public class LoginController {
                 }
                 else {
                     String storedPassword = rs.getString(1);
+                    String username = rs.getString(2);
                     if(password.equals(storedPassword)) {
+                        InstructorModel instructor = new InstructorModel(username, loginEmailField.getText());
                         loginEmailField.setText(null);
                         loginPasswordField.setText(null);
-                        alertController.displayAlert(alertController.loginSuccess());
-                        //load instructor dashboard
+
+                        // get current stage and set InstructorView scene
+                        Stage stage = (Stage) loginEmailField.getScene().getWindow();
+                        Parent root = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/InstructorView.fxml"))).load();
+                        stage.setScene(new Scene(root));
                     } else {
                         alertController.displayAlert(alertController.incorrectPassword());
                     }
                 }
             } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
