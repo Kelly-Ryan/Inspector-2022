@@ -47,17 +47,15 @@ public class LoginController {
                         loginEmailField.setText(null);
                         loginPasswordField.setText(null);
 
-                        // get current stage and set InstructorView scene
-                        Stage stage = (Stage) loginEmailField.getScene().getWindow();
-                        Parent root = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/InstructorView.fxml"))).load();
-                        stage.setScene(new Scene(root));
+                        // set new scene
+                        Scene scene = loginEmailField.getScene();
+                        Parent newRoot = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/InstructorView.fxml"))).load();
+                        scene.setRoot(newRoot);
                     } else {
                         alertController.displayAlert(alertController.incorrectPassword());
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
         }
