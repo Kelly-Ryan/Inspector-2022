@@ -6,8 +6,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
-import models.InstructorModel;
 
 import java.io.IOException;
 import java.sql.*;
@@ -41,16 +39,23 @@ public class LoginController {
                 }
                 else {
                     String storedPassword = rs.getString(1);
-                    String username = rs.getString(2);
                     if(password.equals(storedPassword)) {
-                        InstructorModel instructor = new InstructorModel(username, loginEmailField.getText());
+                        // clear text fields and load new scene root (instructor dashboard)
                         loginEmailField.setText(null);
                         loginPasswordField.setText(null);
 
-                        // set new scene
+                        // create new scene root
+                        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/InstructorView.fxml")));
+                        Parent newRoot = loader.load();
+                        //get current scene
                         Scene scene = loginEmailField.getScene();
-                        Parent newRoot = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/InstructorView.fxml"))).load();
+                        // set new root in current scene
                         scene.setRoot(newRoot);
+
+                        // get controller for current scene
+                        InstructorController instructorController = loader.getController();
+                        instructorController.setupDashboard(email);
+
                     } else {
                         alertController.displayAlert(alertController.incorrectPassword());
                     }
