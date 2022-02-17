@@ -6,17 +6,11 @@
 }
 
 .label{
-    /*-fx-text-fill: #283747;*/
     -fx-text-fill: #154360;
 }
 
 .button{
     -fx-background-color: linear-gradient(#b9d7ea, #85B1E4);
-    -fx-text-fill: #283747;
-}
-
-.text{
-    -fx-alignment: center;
     -fx-text-fill: #283747;
 }
 
@@ -28,6 +22,12 @@
 .hbox {
     -fx-border-color: #000000;
     -fx-border-width: 1px;
+}
+
+#submissionDisplay {
+    -fx-background-color: #FFFFFF;
+    -fx-font-family: Consolas;
+
 }
 
 /*colour palette*/

@@ -1,15 +1,21 @@
 package models;
 
+import java.util.List;
+
 public class InstructorModel {
-    private String name, email, password;
+    private final int instructorId;
+    private final String name, email;
+    private List<Module> modules;
 
-    public InstructorModel() {
-    }
-
-    public InstructorModel(String name, String email, String password) {
+    //called when existing user logs in
+    public InstructorModel(int instructorId, String name, String email) {
+        this.instructorId = instructorId;
         this.name = name;
         this.email = email;
-        this.password = password;
+    }
+
+    public String getInstructorId() {
+        return Integer.toString(instructorId);
     }
 
     public String getName() {
@@ -20,15 +26,11 @@ public class InstructorModel {
         return email;
     }
 
-    public String getPassword() {
-        return password;
+    public void addModule(String moduleCode) {
+
     }
 
-    @Override
-    public String toString() {
-        return "InstructorModel{" +
-                ", name='" + getName() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                '}';
+    public List<Module> getModules() {
+        return modules;
     }
 }

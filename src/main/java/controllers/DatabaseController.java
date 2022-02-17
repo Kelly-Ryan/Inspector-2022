@@ -11,7 +11,7 @@ public class DatabaseController {
         try {
             Class.forName("org.sqlite.JDBC");
             //create database if it does not already exist and connect to it
-            conn = DriverManager.getConnection("jdbc:sqlite:src/main/java/db/inspector.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:src/main/resources/db/inspector.db");
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
@@ -35,6 +35,8 @@ public class DatabaseController {
                     "moduleId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
                     "moduleCode    VARCHAR(6)  NOT NULL," +
                     "moduleName    VARCHAR(50) NOT NULL," +
+                    "academicYear   YEAR    NOT NULL," +
+                    "semester       INT(1)  NOT NULL," +
                     "instructorId  INT(10)     NOT NULL REFERENCES INSTRUCTOR(instructorId)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS STUDENT (" +
@@ -42,19 +44,18 @@ public class DatabaseController {
                     "); "+
                     "CREATE TABLE IF NOT EXISTS ASSIGNMENT (" +
                     "assignmentId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                    "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
-                    "academicYear   YEAR    NOT NULL," +
-                    "semester       INT(1)  NOT NULL" +
+                    "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS ASSIGNMENT_SUBMISSION (" +
                     "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
                     "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
                     "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
+                    "filename       VARCHAR(50) NOT NULL," +
                     "maxMarks       FLOAT," +
                     "receivedMarks  FLOAT," +
-                    "assignmentText MEDIUMTEXT," +
+                    "assignmentText MEDIUMTEXT NOT NULL," +
                     "comments       VARCHAR(1000)," +
-                    "CONSTRAINT COMP_KEY PRIMARY KEY (assignmentId, moduleId, studentId)" +
+                    "CONSTRAINT COMP_KEY PRIMARY KEY (assignmentId, moduleId, studentId, filename)" +
                     ");";
             //create database tables
             stmt.executeUpdate(sql);

@@ -2,12 +2,16 @@ package controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 
+import java.io.IOException;
 import java.sql.*;
+import java.util.Objects;
 
 public class LoginController {
-    Connection conn;
     AlertController alertController = new AlertController();
     @FXML private TextField loginEmailField;
     @FXML private TextField loginPasswordField;
@@ -24,26 +28,39 @@ public class LoginController {
         if(email.isEmpty() || password.isEmpty()) {
             alertController.displayAlert(alertController.missingData());
         } else {
-            conn = DatabaseController.dbConnect();
-            String sql = "SELECT password FROM INSTRUCTOR WHERE email = ?";
+            Connection conn = DatabaseController.dbConnect();
+            String sql = "SELECT password, name FROM INSTRUCTOR WHERE email = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, email);
                 ResultSet rs = pstmt.executeQuery();
                 if(rs.isClosed()) {
+                    conn.close();
                     alertController.displayAlert(alertController.userNotFound());
                 }
                 else {
                     String storedPassword = rs.getString(1);
+                    conn.close();
                     if(password.equals(storedPassword)) {
+                        // clear text fields and load new scene root (instructor dashboard)
                         loginEmailField.setText(null);
                         loginPasswordField.setText(null);
-                        alertController.displayAlert(alertController.loginSuccess());
-                        //load instructor dashboard
+
+                        // create new scene root
+                        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/InstructorView.fxml")));
+                        Parent newRoot = loader.load();
+                        //get current scene
+                        Scene scene = loginEmailField.getScene();
+                        // set new root in current scene
+                        scene.setRoot(newRoot);
+
+                        // get controller for current scene
+                        InstructorController instructorController = loader.getController();
+                        instructorController.setupDashboard(instructorController, email);
                     } else {
                         alertController.displayAlert(alertController.incorrectPassword());
                     }
                 }
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 e.printStackTrace();
             }
         }

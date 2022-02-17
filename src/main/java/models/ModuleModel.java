@@ -4,9 +4,6 @@ public class ModuleModel {
     private int moduleId, instructorId;
     private String moduleCode, moduleName;
 
-    public ModuleModel() {
-    }
-
     public ModuleModel(int moduleId, int instructorId, String moduleCode, String moduleName) {
         this.moduleId = moduleId;
         this.instructorId = instructorId;

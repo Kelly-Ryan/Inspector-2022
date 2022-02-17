@@ -15,7 +15,7 @@
    <children>
       <ImageView fitHeight="300.0" fitWidth="400.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../images/inspector logo.png" />
+            <Image url="@../images/inspector_banner.png" />
          </image>
          <VBox.margin>
             <Insets bottom="120.0" left="80.0" right="80.0" top="80.0" />
