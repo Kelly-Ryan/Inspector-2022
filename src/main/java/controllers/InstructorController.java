@@ -21,17 +21,15 @@ import java.util.Objects;
 
 public class InstructorController {
     private InstructorModel instructor;
-
-//    @FXML private MenuItem importSubmissionMenuItem;
-//    @FXML private MenuItem importMultiSubmissionsMenuItem;
+    InstructorController instructorController;
     @FXML private Text submissionDisplay;
     @FXML private Label username;
     @FXML private TreeView<File> treeView;
-    @FXML private TitledPane titledPane1;
 
     private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
 
-    void setupDashboard(String email){
+    void setupDashboard(InstructorController instructorController, String email){
+        this.instructorController = instructorController;
         //sql query to initialize InstructorModel object
         Connection conn = DatabaseController.dbConnect();
         String sql = "SELECT instructorId, name FROM INSTRUCTOR WHERE email = ?";
@@ -41,6 +39,7 @@ public class InstructorController {
             ResultSet rs = pstmt.executeQuery();
             int instructorId = Integer.parseInt(rs.getString(1));
             String name = rs.getString(2);
+            conn.close();
 
             instructor = new InstructorModel(instructorId, name, email);
             username.setText("Hello, " + instructor.getName());
@@ -89,8 +88,29 @@ public class InstructorController {
                     TreeItem<File> treeItem = cell.getTreeItem();
                     File f = treeItem.getValue();
                     if (!f.isDirectory()) {
-                        //set submissionDisplay text to file text
-                        System.out.println(treeItem.getValue());
+                        //TODO set submissionDisplay from Submission table
+                        String studentIdDir = treeItem.getParent().getValue().toString();
+                        String assignmentDir = treeItem.getParent().getParent().getValue().toString();
+                        String moduleDir = treeItem.getParent().getParent().getParent().getValue().toString();
+
+                        System.out.println(f);
+                        System.out.println(studentIdDir);
+                        System.out.println(assignmentDir);
+                        System.out.println(moduleDir);
+
+                        Connection conn = DatabaseController.dbConnect();
+                        String getSubmission = "SELECT assignmentText FROM ASSIGNMENT_SUBMISSION WHERE assignmentId = ? AND moduleId = ? AND studentId = ? and filename = ?";
+                        try(PreparedStatement pstmt = conn.prepareStatement(getSubmission)){
+                            pstmt.setString(1, assignmentDir);
+                            pstmt.setString(2, moduleDir);
+                            pstmt.setString(3, studentIdDir);
+                            pstmt.setString(4, f.toString());
+                            ResultSet rs = pstmt.executeQuery();
+                            submissionDisplay.setText(rs.getString(1));
+                            conn.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             });
@@ -103,7 +123,6 @@ public class InstructorController {
         //populate tree
         assert fileList != null;
         for (File file : fileList) {
-            //call readFile() and insert sql records from there
             createFileTree(file, rootItem);
         }
     }
@@ -117,42 +136,25 @@ public class InstructorController {
             for (File f : Objects.requireNonNull(file.listFiles())) {
                 createFileTree(f, fileItem);
             }
-        }
-    }
-
-    @FXML
-    void importSubmission() {
-        FileChooser fileChooser = new FileChooser();
-        File file = fileChooser.showOpenDialog(new Stage());
-        if(file != null) {
-            submissionDisplay.setText(readFile(file));
-        }
-    }
-
-    @FXML
-    void importMultipleSubmissions() {
-        FileChooser fileChooser = new FileChooser();
-        List<File> fileList = fileChooser.showOpenMultipleDialog(new Stage());
-        if(fileList != null) {
-            StringBuilder sb = new StringBuilder();
-            for (File file : fileList) {
-                sb.append(readFile(file)).append("\n**********EOF**********\n\n");
-            }
-            submissionDisplay.setText(sb.toString());
+        } else {
+            //read in source files and create records in Submission table
+            readFile(file);
         }
     }
 
     //submitted assignment files should be in parent directory named with student ID number
-    String readFile(File file) {
+    //e.g. CS4123/week03/0347345/helloWorld.c
+    void readFile(File file) {
+        String filepath = file.toString();
         //split directories in filepath - "\" for Windows and "/" for Unix/Mac
-        String[] filepath = file.getParentFile().toString().split("[\\\\/]");
-        String module = filepath[filepath.length-3];
-        //assignmentName could be a week number, e.g. labs
-        String assignment = filepath[filepath.length-2];
-        //parent directory of source files named with student ID
-        String studentID = filepath[filepath.length-1];
+        String[] splitFilepath = file.toString().split("[\\\\/]");
+        String module = splitFilepath[splitFilepath.length-4];
+        String assignment = splitFilepath[splitFilepath.length-3];
+        String studentID = splitFilepath[splitFilepath.length-2];
+        String filename = splitFilepath[splitFilepath.length-1];
+        String submission = "";
 
-        titledPane1.setText(module);
+        System.out.println(filepath);
 
         //read file text
         StringBuilder sb = new StringBuilder();
@@ -165,13 +167,47 @@ public class InstructorController {
                 sb.append(line).append("\n");
                 line = br.readLine();
             }
+            submission = sb.toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        //SQL insert records
+        //TODO SQL insert records
+        Connection conn = DatabaseController.dbConnect();
+        String insertSubmission = "INSERT INTO ASSIGNMENT_SUBMISSION (assignmentId, moduleId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?)";
+        try(PreparedStatement pstmt = conn.prepareStatement(insertSubmission)){
+            pstmt.setString(1, assignment);
+            pstmt.setString(2, module);
+            pstmt.setString(3, studentID);
+            pstmt.setString(4, filename);
+            pstmt.setString(5, submission);
+            pstmt.execute();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-        return sb.toString();
+    @FXML
+    void importSubmission() {
+        FileChooser fileChooser = new FileChooser();
+        File file = fileChooser.showOpenDialog(new Stage());
+        if(file != null) {
+            //submissionDisplay.setText(readFile(file));
+        }
+    }
+
+    @FXML
+    void importMultipleSubmissions() {
+        FileChooser fileChooser = new FileChooser();
+        List<File> fileList = fileChooser.showOpenMultipleDialog(new Stage());
+        if(fileList != null) {
+            StringBuilder sb = new StringBuilder();
+            for (File file : fileList) {
+                //sb.append(readFile(file)).append("\n**********EOF**********\n\n");
+            }
+            submissionDisplay.setText(sb.toString());
+        }
     }
 
     @FXML

@@ -14,8 +14,8 @@ public class InstructorModel {
         this.email = email;
     }
 
-    public int getInstructorId() {
-        return instructorId;
+    public String getInstructorId() {
+        return Integer.toString(instructorId);
     }
 
     public String getName() {

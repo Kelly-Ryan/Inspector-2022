@@ -12,7 +12,6 @@ import java.sql.*;
 import java.util.Objects;
 
 public class LoginController {
-    Connection conn;
     AlertController alertController = new AlertController();
     @FXML private TextField loginEmailField;
     @FXML private TextField loginPasswordField;
@@ -29,16 +28,18 @@ public class LoginController {
         if(email.isEmpty() || password.isEmpty()) {
             alertController.displayAlert(alertController.missingData());
         } else {
-            conn = DatabaseController.dbConnect();
+            Connection conn = DatabaseController.dbConnect();
             String sql = "SELECT password, name FROM INSTRUCTOR WHERE email = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, email);
                 ResultSet rs = pstmt.executeQuery();
                 if(rs.isClosed()) {
+                    conn.close();
                     alertController.displayAlert(alertController.userNotFound());
                 }
                 else {
                     String storedPassword = rs.getString(1);
+                    conn.close();
                     if(password.equals(storedPassword)) {
                         // clear text fields and load new scene root (instructor dashboard)
                         loginEmailField.setText(null);
@@ -54,8 +55,7 @@ public class LoginController {
 
                         // get controller for current scene
                         InstructorController instructorController = loader.getController();
-                        instructorController.setupDashboard(email);
-
+                        instructorController.setupDashboard(instructorController, email);
                     } else {
                         alertController.displayAlert(alertController.incorrectPassword());
                     }
