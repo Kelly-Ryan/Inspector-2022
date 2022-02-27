@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.InstructorModel;
 
@@ -16,7 +15,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Objects;
 
 public class InstructorController {
@@ -30,20 +28,18 @@ public class InstructorController {
 
     void setupDashboard(InstructorController instructorController, String email){
         this.instructorController = instructorController;
+
         //sql query to initialize InstructorModel object
         Connection conn = DatabaseController.dbConnect();
         String sql = "SELECT instructorId, name FROM INSTRUCTOR WHERE email = ?";
-        //String sql = "SELECT name, moduleCode, moduleName FROM INSTRUCTOR JOIN MODULE M on INSTRUCTOR.instructorId = M.instructorId WHERE email = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, email);
             ResultSet rs = pstmt.executeQuery();
             int instructorId = Integer.parseInt(rs.getString(1));
             String name = rs.getString(2);
             conn.close();
-
             instructor = new InstructorModel(instructorId, name, email);
             username.setText("Hello, " + instructor.getName());
-
             displayFileTree(treeView);
 
         } catch (SQLException e) {
@@ -67,7 +63,6 @@ public class InstructorController {
         TreeItem<File> rootItem = new TreeItem<>(importDirectory);
         //hide root item of treeView
         treeView.setShowRoot(false);
-        System.out.println(rootItem.getValue().toString());
         treeView.setRoot(rootItem);
 
         treeView.setCellFactory(tv -> {
@@ -84,33 +79,11 @@ public class InstructorController {
             };
             cell.setOnMouseClicked(event -> {
                 if (!cell.isEmpty()) {
-                    //display submission on click
+                    //display submission text when filename is clicked
                     TreeItem<File> treeItem = cell.getTreeItem();
-                    File f = treeItem.getValue();
-                    if (!f.isDirectory()) {
-                        //TODO set submissionDisplay from Submission table
-                        String studentIdDir = treeItem.getParent().getValue().toString();
-                        String assignmentDir = treeItem.getParent().getParent().getValue().toString();
-                        String moduleDir = treeItem.getParent().getParent().getParent().getValue().toString();
-
-                        System.out.println(f);
-                        System.out.println(studentIdDir);
-                        System.out.println(assignmentDir);
-                        System.out.println(moduleDir);
-
-                        Connection conn = DatabaseController.dbConnect();
-                        String getSubmission = "SELECT assignmentText FROM ASSIGNMENT_SUBMISSION WHERE assignmentId = ? AND moduleId = ? AND studentId = ? and filename = ?";
-                        try(PreparedStatement pstmt = conn.prepareStatement(getSubmission)){
-                            pstmt.setString(1, assignmentDir);
-                            pstmt.setString(2, moduleDir);
-                            pstmt.setString(3, studentIdDir);
-                            pstmt.setString(4, f.toString());
-                            ResultSet rs = pstmt.executeQuery();
-                            submissionDisplay.setText(rs.getString(1));
-                            conn.close();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
+                    File file = treeItem.getValue();
+                    if (!file.isDirectory()) {
+                        submissionDisplay.setText(getSubmissionText(treeItem, file));
                     }
                 }
             });
@@ -125,6 +98,28 @@ public class InstructorController {
         for (File file : fileList) {
             createFileTree(file, rootItem);
         }
+    }
+
+    String getSubmissionText(TreeItem<File> treeItem,File file) {
+        String studentIdDir = treeItem.getParent().getValue().toString();
+        String assignmentDir = treeItem.getParent().getParent().getValue().toString();
+        String moduleDir = treeItem.getParent().getParent().getParent().getValue().toString();
+        String submissionText = "";
+
+        Connection conn = DatabaseController.dbConnect();
+        String getSubmission = "SELECT assignmentText FROM ASSIGNMENT_SUBMISSION WHERE assignmentId = ? AND moduleId = ? AND studentId = ? and filename = ?";
+        try(PreparedStatement pstmt = conn.prepareStatement(getSubmission)){
+            pstmt.setString(1, assignmentDir);
+            pstmt.setString(2, moduleDir);
+            pstmt.setString(3, studentIdDir);
+            pstmt.setString(4, file.toString());
+            ResultSet rs = pstmt.executeQuery();
+            submissionText = rs.getString(1);
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return submissionText;
     }
 
     void createFileTree(File file, TreeItem<File> parent) {
@@ -154,8 +149,6 @@ public class InstructorController {
         String filename = splitFilepath[splitFilepath.length-1];
         String submission = "";
 
-        System.out.println(filepath);
-
         //read file text
         StringBuilder sb = new StringBuilder();
         try {
@@ -172,7 +165,7 @@ public class InstructorController {
             e.printStackTrace();
         }
 
-        //TODO SQL insert records
+        //TODO amend Submissions table to include instructorId, AY and semester
         Connection conn = DatabaseController.dbConnect();
         String insertSubmission = "INSERT INTO ASSIGNMENT_SUBMISSION (assignmentId, moduleId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?)";
         try(PreparedStatement pstmt = conn.prepareStatement(insertSubmission)){
@@ -187,36 +180,6 @@ public class InstructorController {
             e.printStackTrace();
         }
     }
-
-    @FXML
-    void importSubmission() {
-        FileChooser fileChooser = new FileChooser();
-        File file = fileChooser.showOpenDialog(new Stage());
-        if(file != null) {
-            //submissionDisplay.setText(readFile(file));
-        }
-    }
-
-    @FXML
-    void importMultipleSubmissions() {
-        FileChooser fileChooser = new FileChooser();
-        List<File> fileList = fileChooser.showOpenMultipleDialog(new Stage());
-        if(fileList != null) {
-            StringBuilder sb = new StringBuilder();
-            for (File file : fileList) {
-                //sb.append(readFile(file)).append("\n**********EOF**********\n\n");
-            }
-            submissionDisplay.setText(sb.toString());
-        }
-    }
-
-    @FXML
-    void addModule() {
-        System.out.println("add module ");
-        //dialog with forms
-        //pass form data to instructor.addModule() - update SQL and reload module view
-    }
-
 
     @FXML
     void exitApplication(){
