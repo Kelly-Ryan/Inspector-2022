@@ -14,20 +14,9 @@
     -fx-text-fill: #283747;
 }
 
-.vbox {
-    -fx-border-color: #000000;
-    -fx-border-width: 1px;
-}
-
-.hbox {
-    -fx-border-color: #000000;
-    -fx-border-width: 1px;
-}
-
-#submissionDisplay {
+.submission-display-section {
     -fx-background-color: #FFFFFF;
     -fx-font-family: Consolas;
-
 }
 
 /*colour palette*/

@@ -47,15 +47,15 @@ public class DatabaseController {
                     "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS ASSIGNMENT_SUBMISSION (" +
-                    "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
                     "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
+                    "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
                     "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
                     "filename       VARCHAR(50) NOT NULL," +
+                    "assignmentText MEDIUMTEXT NOT NULL," +
                     "maxMarks       FLOAT," +
                     "receivedMarks  FLOAT," +
-                    "assignmentText MEDIUMTEXT NOT NULL," +
                     "comments       VARCHAR(1000)," +
-                    "CONSTRAINT COMP_KEY PRIMARY KEY (assignmentId, moduleId, studentId, filename)" +
+                    "CONSTRAINT COMP_KEY PRIMARY KEY (moduleId, assignmentId, studentId, filename)" +
                     ");";
             //create database tables
             stmt.executeUpdate(sql);
