@@ -6,6 +6,7 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import models.InstructorModel;
+import models.SubmissionModel;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,11 +19,32 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public class InstructorController {
-    private InstructorModel instructor;
     InstructorController instructorController;
+    private InstructorModel instructor;
+    private SubmissionModel currentSubmission;
+    private int maxMarks, marksReceived;
     @FXML private Text submissionDisplay;
     @FXML private Label username;
     @FXML private TreeView<File> treeView;
+    @FXML private TextField criterion1MarkInput;
+    @FXML private TextField criterion2MarkInput;
+    @FXML private TextField criterion3MarkInput;
+    @FXML private TextField criterion4MarkInput;
+    @FXML private TextField criterion1NameInput;
+    @FXML private TextField criterion2NameInput;
+    @FXML private TextField criterion3NameInput;
+    @FXML private TextField criterion4NameInput;
+    @FXML private TextField criterion1Mark;
+    @FXML private TextField criterion2Mark;
+    @FXML private TextField criterion3Mark;
+    @FXML private TextField criterion4Mark;
+    @FXML private Label criterion1Name;
+    @FXML private Label criterion2Name;
+    @FXML private Label criterion3Name;
+    @FXML private Label criterion4Name;
+    @FXML private Label maxMarksLabel;
+    @FXML private Label marksReceivedLabel;
+    @FXML private TextArea feedbackTextArea;
 
     private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
 
@@ -38,6 +60,7 @@ public class InstructorController {
             int instructorId = Integer.parseInt(rs.getString(1));
             String name = rs.getString(2);
             conn.close();
+
             instructor = new InstructorModel(instructorId, name, email);
             username.setText("Hello, " + instructor.getName());
             displayFileTree(treeView);
@@ -116,6 +139,7 @@ public class InstructorController {
             ResultSet rs = pstmt.executeQuery();
             submissionText = rs.getString(1);
             conn.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -167,10 +191,10 @@ public class InstructorController {
 
         //TODO amend Submissions table to include instructorId, AY and semester
         Connection conn = DatabaseController.dbConnect();
-        String insertSubmission = "INSERT INTO ASSIGNMENT_SUBMISSION (assignmentId, moduleId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?)";
+        String insertSubmission = "INSERT INTO ASSIGNMENT_SUBMISSION (moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?)";
         try(PreparedStatement pstmt = conn.prepareStatement(insertSubmission)){
-            pstmt.setString(1, assignment);
-            pstmt.setString(2, module);
+            pstmt.setString(1, module);
+            pstmt.setString(2, assignment);
             pstmt.setString(3, studentID);
             pstmt.setString(4, filename);
             pstmt.setString(5, submission);
@@ -179,6 +203,79 @@ public class InstructorController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    void setGradingRubric() {
+        maxMarks = Integer.parseInt(criterion1MarkInput.getText()) +
+                Integer.parseInt(criterion2MarkInput.getText()) +
+                Integer.parseInt(criterion3MarkInput.getText()) +
+                Integer.parseInt(criterion4MarkInput.getText());
+
+        criterion1Name.setText("/" + criterion1MarkInput.getText() + " " + criterion1NameInput.getText());
+        criterion2Name.setText("/" + criterion2MarkInput.getText() + " " + criterion2NameInput.getText());
+        criterion3Name.setText("/" + criterion3MarkInput.getText() + " " + criterion3NameInput.getText());
+        criterion4Name.setText("/" + criterion4MarkInput.getText() + " " + criterion4NameInput.getText());
+        maxMarksLabel.setText("Max marks: " + maxMarks);
+
+        handleNullMarks();
+    }
+
+    void handleNullMarks() {
+        if(criterion1Mark.getText().isEmpty()) {
+            criterion1Mark.setText("0");
+        }
+
+        if(criterion2Mark.getText().isEmpty()) {
+            criterion2Mark.setText("0");
+        }
+
+        if(criterion3Mark.getText().isEmpty()) {
+            criterion3Mark.setText("0");
+        }
+
+        if(criterion4Mark.getText().isEmpty()) {
+            criterion4Mark.setText("0");
+        }
+    }
+
+    @FXML
+    void updateMarksReceived() {
+        marksReceived = Integer.parseInt(criterion1Mark.getText()) +
+                Integer.parseInt(criterion2Mark.getText()) +
+                Integer.parseInt(criterion3Mark.getText()) +
+                Integer.parseInt(criterion4Mark.getText());
+
+        marksReceivedLabel.setText("Marks received: " + marksReceived);
+    }
+
+    @FXML
+    void saveMarks() {
+        Connection conn = DatabaseController.dbConnect();
+        String insertSubmission = "UPDATE ASSIGNMENT_SUBMISSION SET maxMarks = ?, receivedMarks = ?, comments = ? " +
+                "WHERE  moduleId = ? AND assignmentId = ? AND studentId = ? and filename = ?";
+        try(PreparedStatement pstmt = conn.prepareStatement(insertSubmission)){
+            pstmt.setString(1, Integer.toString(maxMarks));
+            pstmt.setString(2, Integer.toString(marksReceived));
+            pstmt.setString(3, feedbackTextArea.getText());
+//            pstmt.setString(4, );
+//            pstmt.setString(5, );
+//            pstmt.setString(6, );
+//            pstmt.setString(7, );
+            pstmt.execute();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void saveRubric() {
+        criterion1Mark.getText();
+        criterion1Name.getText();
+
+        criterion1MarkInput.getText();
+        criterion1NameInput.getText();
+
     }
 
     @FXML

@@ -1,6 +1,6 @@
 package models;
 
-class SubmissionModel {
+public class SubmissionModel {
     private int assignmentId, moduleId;
     private String studentId, assignmentText, comments;
     private float maxMarks, receivedMarks;
@@ -8,9 +8,8 @@ class SubmissionModel {
     public SubmissionModel() {
     }
 
-    public SubmissionModel(int assignmentId, int moduleId, String studentId, String assignmentText, String comments,
+    public SubmissionModel(int moduleId, String studentId, String assignmentText, String comments,
                            float maxMarks, float receivedMarks) {
-        this.assignmentId = assignmentId;
         this.moduleId = moduleId;
         this.studentId = studentId;
         this.assignmentText = assignmentText;
