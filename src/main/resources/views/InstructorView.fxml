@@ -93,7 +93,7 @@
                   <Label text="Marks" />
                   <HBox alignment="CENTER_LEFT" minWidth="300.0">
                      <children>
-                        <TextField id="criterion1Mark" fx:id="criterion1Mark" onKeyTyped="#updateMarksReceived" prefHeight="27.0" prefWidth="26.0" />
+                        <TextField id="criterion1Mark" fx:id="criterion1Mark" onMouseExited="#updateTotalMarks" prefHeight="27.0" prefWidth="26.0" />
                         <Label id="criterion1Name" fx:id="criterion1Name" text="criterion 1" />
                      </children>
                      <padding>
@@ -102,7 +102,7 @@
                   </HBox>
                   <HBox alignment="CENTER_LEFT">
                      <children>
-                        <TextField id="criterion1Mark" fx:id="criterion2Mark" onKeyTyped="#updateMarksReceived" prefHeight="27.0" prefWidth="26.0" />
+                        <TextField id="criterion2Mark" fx:id="criterion2Mark" onMouseExited="#updateTotalMarks" prefHeight="27.0" prefWidth="26.0" />
                         <Label id="criterion2Name" fx:id="criterion2Name" text="criterion 2" />
                      </children>
                      <padding>
@@ -111,7 +111,7 @@
                   </HBox>
                   <HBox alignment="CENTER_LEFT">
                      <children>
-                        <TextField id="criterion3Mark" fx:id="criterion3Mark" onKeyTyped="#updateMarksReceived" prefHeight="27.0" prefWidth="26.0" />
+                        <TextField id="criterion3Mark" fx:id="criterion3Mark" onMouseExited="#updateTotalMarks" prefHeight="27.0" prefWidth="26.0" />
                         <Label id="criterion3Name" fx:id="criterion3Name" text="criterion 3" />
                      </children>
                      <padding>
@@ -120,7 +120,7 @@
                   </HBox>
                   <HBox alignment="CENTER_LEFT">
                      <children>
-                        <TextField id="criterion4Mark" fx:id="criterion4Mark" onKeyTyped="#updateMarksReceived" prefHeight="27.0" prefWidth="26.0" />
+                        <TextField id="criterion4Mark" fx:id="criterion4Mark" onMouseExited="#updateTotalMarks" prefHeight="27.0" prefWidth="26.0" />
                         <Label id="criterion4Name" fx:id="criterion4Name" text="criterion 4" />
                      </children>
                      <padding>
@@ -137,7 +137,7 @@
                   </HBox>
                   <HBox alignment="CENTER_LEFT" spacing="10.0">
                      <children>
-                        <Label id="marksReceivedLabel" fx:id="marksReceivedLabel" text="Marks received: " />
+                        <Label id="marksReceivedLabel" fx:id="marksReceivedLabel" text="Total marks: " />
                      </children>
                      <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -149,7 +149,7 @@
                <children>
                   <Label text="Feedback" />
                   <TextArea id="feedbackTextArea" fx:id="feedbackTextArea" prefHeight="400.0" prefWidth="200.0" wrapText="true" />
-                  <Button mnemonicParsing="false" text="Save" />
+                  <Button mnemonicParsing="false" onAction="#saveMarks" text="Save" />
                </children>
                <VBox.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

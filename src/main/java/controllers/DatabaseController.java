@@ -47,14 +47,25 @@ public class DatabaseController {
                     "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS ASSIGNMENT_SUBMISSION (" +
+                    "instructorId	INT(10) NOT NULL REFERENCES INSTRUCTOR(InstructorId)," +
+                    "academicYear	VARCHAR(5) DEFAULT 'year not set'," +
+                    "semester		VARCHAR(20) DEFAULT 'semester not set'," +
+                    "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
+                    "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
+                    "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
+                    "gradingRubric VARCHAR(250) DEFAULT 'rubric not set'," +
+                    "marksReceived VARCHAR(250) DEFAULT  'marks not set'," +
+                    "maxMarks       FLOAT DEFAULT 0.0," +
+                    "totalMarks     FLOAT DEFAULT 0.0," +
+                    "comments       VARCHAR(1000) DEFAULT 'no comments'," +
+                    "CONSTRAINT COMP_KEY PRIMARY KEY (moduleId, assignmentId, studentId)" +
+                    ");" +
+                    "CREATE TABLE IF NOT EXISTS SUBMISSION_FILES (" +
                     "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
                     "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
                     "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
                     "filename       VARCHAR(50) NOT NULL," +
                     "assignmentText MEDIUMTEXT NOT NULL," +
-                    "maxMarks       FLOAT," +
-                    "receivedMarks  FLOAT," +
-                    "comments       VARCHAR(1000)," +
                     "CONSTRAINT COMP_KEY PRIMARY KEY (moduleId, assignmentId, studentId, filename)" +
                     ");";
             //create database tables

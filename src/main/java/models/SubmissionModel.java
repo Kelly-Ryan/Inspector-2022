@@ -1,37 +1,46 @@
 package models;
 
 public class SubmissionModel {
-    private int assignmentId, moduleId;
-    private String studentId, assignmentText, comments;
-    private float maxMarks, receivedMarks;
+    private String moduleId, assignmentId, studentId, gradingRubric, marksReceived,comments;
+    private double maxMarks, totalMarks;
 
-    public SubmissionModel() {
+    public SubmissionModel(String moduleId, String assignmentId, String studentId) {
+        this.moduleId = moduleId;
+        this.assignmentId = assignmentId;
+        this.studentId = studentId;
+        gradingRubric = null;
+        marksReceived =  null;
+        comments = null;
+        maxMarks = 0.0;
+        totalMarks = 0.0;
     }
 
-    public SubmissionModel(int moduleId, String studentId, String assignmentText, String comments,
-                           float maxMarks, float receivedMarks) {
+    public SubmissionModel(String moduleId, String assignmentId, String studentId, String gradingRubric,
+                           String marksReceived, String comments, double maxMarks, double totalMarks) {
         this.moduleId = moduleId;
+        this.assignmentId = assignmentId;
         this.studentId = studentId;
-        this.assignmentText = assignmentText;
+        this.gradingRubric = gradingRubric;
+        this.marksReceived = marksReceived;
         this.comments = comments;
         this.maxMarks = maxMarks;
-        this.receivedMarks = receivedMarks;
+        this.totalMarks = totalMarks;
     }
 
-    public int getAssignmentId() {
-        return assignmentId;
-    }
-
-    public void setAssignmentId(int assignmentId) {
-        this.assignmentId = assignmentId;
-    }
-
-    public int getModuleId() {
+    public String getModuleId() {
         return moduleId;
     }
 
-    public void setModuleId(int moduleId) {
+    public void setModuleId(String moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public String getAssignmentId() {
+        return assignmentId;
+    }
+
+    public void setAssignmentId(String assignmentId) {
+        this.assignmentId = assignmentId;
     }
 
     public String getStudentId() {
@@ -42,12 +51,20 @@ public class SubmissionModel {
         this.studentId = studentId;
     }
 
-    public String getAssignmentText() {
-        return assignmentText;
+    public String getGradingRubric() {
+        return gradingRubric;
     }
 
-    public void setAssignmentText(String assignmentText) {
-        this.assignmentText = assignmentText;
+    public void setGradingRubric(String gradingRubric) {
+        this.gradingRubric = gradingRubric;
+    }
+
+    public String getMarksReceived() {
+        return marksReceived;
+    }
+
+    public void setMarksReceived(String marksReceived) {
+        this.marksReceived = marksReceived;
     }
 
     public String getComments() {
@@ -58,32 +75,19 @@ public class SubmissionModel {
         this.comments = comments;
     }
 
-    public float getMaxMarks() {
+    public double getMaxMarks() {
         return maxMarks;
     }
 
-    public void setMaxMarks(float maxMarks) {
+    public void setMaxMarks(double maxMarks) {
         this.maxMarks = maxMarks;
     }
 
-    public float getReceivedMarks() {
-        return receivedMarks;
+    public double getTotalMarks() {
+        return totalMarks;
     }
 
-    public void setReceivedMarks(float receivedMarks) {
-        this.receivedMarks = receivedMarks;
-    }
-
-    @Override
-    public String toString() {
-        return "SubmissionModel{" +
-                "assignmentId=" + assignmentId +
-                ", moduleId=" + moduleId +
-                ", studentId='" + studentId + '\'' +
-                ", assignmentText='" + assignmentText + '\'' +
-                ", comments='" + comments + '\'' +
-                ", maxMarks=" + maxMarks +
-                ", receivedMarks=" + receivedMarks +
-                '}';
+    public void setTotalMarks(double totalMarks) {
+        this.totalMarks = totalMarks;
     }
 }
