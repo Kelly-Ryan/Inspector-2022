@@ -145,7 +145,6 @@ public class InstructorController {
             e.printStackTrace();
         }
 
-        //TODO SQL query to get all fields matching moduleDir, assignmentDir, studentIdDir and set text to allow for review of already graded submissions
        createSubmissionObject(moduleDir, assignmentDir, studentIdDir);
 
         return submissionText;
@@ -167,7 +166,17 @@ public class InstructorController {
             conn.close();
 
             currentSubmission = new SubmissionModel(moduleId, assignmentId, studentId, gradingRubric,
-                    marksReceived, comments, maxMarks, totalMarks);
+                    marksReceived, maxMarks, totalMarks, comments);
+
+            System.out.println("moduleId: " + moduleId);
+            System.out.println("assignmentId: " + assignmentId);
+            System.out.println("studentId: " + studentId);
+            System.out.println("gradingRubric: " + gradingRubric);
+            System.out.println("marksReceived: " + marksReceived);
+            System.out.println("maxMarks: " + maxMarks);
+            System.out.println("totalMarks: " + totalMarks);
+            System.out.println("comments: " + comments);
+
 
             //TODO set values of textfields from object fields
 
@@ -187,7 +196,7 @@ public class InstructorController {
                 createFileTree(f, fileItem);
             }
         } else {
-            //read in source files and create records in Submission table
+            //read in source files and create records in ASSIGNMENT_SUBMISSION and SUBMISSION_FILES tables
             readFile(file);
         }
     }
@@ -220,7 +229,7 @@ public class InstructorController {
         }
 
         Connection conn = DatabaseController.dbConnect();
-        String importSubmissions = "INSERT OR REPLACE INTO ASSIGNMENT_SUBMISSION (instructorId, moduleId, assignmentId, studentId) VALUES (?, ?, ?, ?);";
+        String importSubmissions = "INSERT OR IGNORE INTO ASSIGNMENT_SUBMISSION (instructorId, moduleId, assignmentId, studentId) VALUES (?, ?, ?, ?);";
         try(PreparedStatement pstmt = conn.prepareStatement(importSubmissions)){
             pstmt.setString(1, instructor.getInstructorId());
             pstmt.setString(2, module);
@@ -231,7 +240,7 @@ public class InstructorController {
             e.printStackTrace();
         }
 
-        String importSubmissionFiles = "INSERT OR REPLACE INTO SUBMISSION_FILES (moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?);";
+        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?);";
         try(PreparedStatement pstmt = conn.prepareStatement(importSubmissionFiles)){
             pstmt.setString(1, module);
             pstmt.setString(2, assignment);

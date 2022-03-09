@@ -10,21 +10,21 @@ public class SubmissionModel {
         this.studentId = studentId;
         gradingRubric = null;
         marksReceived =  null;
-        comments = null;
         maxMarks = 0.0;
         totalMarks = 0.0;
+        comments = null;
     }
 
     public SubmissionModel(String moduleId, String assignmentId, String studentId, String gradingRubric,
-                           String marksReceived, String comments, double maxMarks, double totalMarks) {
+                           String marksReceived,  double maxMarks, double totalMarks, String comments) {
         this.moduleId = moduleId;
         this.assignmentId = assignmentId;
         this.studentId = studentId;
         this.gradingRubric = gradingRubric;
         this.marksReceived = marksReceived;
-        this.comments = comments;
         this.maxMarks = maxMarks;
         this.totalMarks = totalMarks;
+        this.comments = comments;
     }
 
     public String getModuleId() {
@@ -67,14 +67,6 @@ public class SubmissionModel {
         this.marksReceived = marksReceived;
     }
 
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
     public double getMaxMarks() {
         return maxMarks;
     }
@@ -90,4 +82,14 @@ public class SubmissionModel {
     public void setTotalMarks(double totalMarks) {
         this.totalMarks = totalMarks;
     }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+
 }
