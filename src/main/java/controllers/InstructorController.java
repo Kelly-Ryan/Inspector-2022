@@ -16,12 +16,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class InstructorController {
     InstructorController instructorController;
     private InstructorModel instructor;
     private SubmissionModel currentSubmission;
+    String[] rubric, marks;
     @FXML private Text submissionDisplay;
     @FXML private Label username;
     @FXML private TreeView<File> treeView;
@@ -104,7 +106,7 @@ public class InstructorController {
                     //display submission text when filename is clicked
                     TreeItem<File> treeItem = cell.getTreeItem();
                     File file = treeItem.getValue();
-                    if (!file.isDirectory()) {
+                    if (treeItem.isLeaf()) {
                         submissionDisplay.setText(loadSubmission(treeItem, file));
                     }
                 }
@@ -140,7 +142,7 @@ public class InstructorController {
             submissionText = rs.getString(1);
             conn.close();
 
-            //TODO this exception is triggering when module, assignment or studentId are clicked
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -176,9 +178,44 @@ public class InstructorController {
             System.out.println("maxMarks: " + maxMarks);
             System.out.println("totalMarks: " + totalMarks);
             System.out.println("comments: " + comments);
+            System.out.println();
 
+            if(gradingRubric.equals("rubric not set")) {
+                rubric = new String[8];
+                Arrays.fill(rubric, "");
+            } else {
+                rubric = gradingRubric.split(",");
+            }
 
-            //TODO set values of textfields from object fields
+            criterion1MarkInput.setText(rubric[0]);
+            criterion1NameInput.setText(rubric[1]);
+            criterion2MarkInput.setText(rubric[2]);
+            criterion2NameInput.setText(rubric[3]);
+            criterion3MarkInput.setText(rubric[4]);
+            criterion3NameInput.setText(rubric[5]);
+            criterion4MarkInput.setText(rubric[6]);
+            criterion4NameInput.setText(rubric[7]);
+
+            if(marksReceived.equals("marks not set")) {
+                marks = new String[8];
+                Arrays.fill(marks, "");
+            } else {
+                marks = marksReceived.split(",");
+            }
+
+            criterion1Mark.setText(marks[0]);
+            criterion1Name.setText(marks[1]);
+            criterion2Mark.setText(marks[2]);
+            criterion2Name.setText(marks[3]);
+            criterion3Mark.setText(marks[4]);
+            criterion3Name.setText(marks[5]);
+            criterion4Mark.setText(marks[6]);
+            criterion4Name.setText(marks[7]);
+
+            maxMarksLabel.setText("Max marks: " + maxMarks);
+            marksReceivedLabel.setText("Total marks: " + totalMarks);
+            feedbackTextArea.setText(comments);
+
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -271,8 +308,8 @@ public class InstructorController {
         maxMarksLabel.setText("Max marks: " + currentSubmission.getMaxMarks());
 
         currentSubmission.setGradingRubric(criterion1MarkInput.getText() + ","+ criterion1NameInput.getText() + "," +
-                criterion2MarkInput.getText() + "," + criterion2NameInput.getText() + "," + criterion3MarkInput + "," +
-                criterion3NameInput.getText() + "," + criterion4MarkInput + "," + criterion4NameInput);
+                criterion2MarkInput.getText() + "," + criterion2NameInput.getText() + "," + criterion3MarkInput.getText() + "," +
+                criterion3NameInput.getText() + "," + criterion4MarkInput.getText() + "," + criterion4NameInput.getText());
 
         handleNullMarks();
     }
