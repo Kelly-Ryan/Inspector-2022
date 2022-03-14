@@ -16,13 +16,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class InstructorController {
     InstructorController instructorController;
     private InstructorModel instructor;
     private SubmissionModel currentSubmission;
-    private int maxMarks, marksReceived;
+    String[] rubric, marks;
     @FXML private Text submissionDisplay;
     @FXML private Label username;
     @FXML private TreeView<File> treeView;
@@ -105,8 +106,8 @@ public class InstructorController {
                     //display submission text when filename is clicked
                     TreeItem<File> treeItem = cell.getTreeItem();
                     File file = treeItem.getValue();
-                    if (!file.isDirectory()) {
-                        submissionDisplay.setText(getSubmissionText(treeItem, file));
+                    if (treeItem.isLeaf()) {
+                        submissionDisplay.setText(loadSubmission(treeItem, file));
                     }
                 }
             });
@@ -123,27 +124,103 @@ public class InstructorController {
         }
     }
 
-    String getSubmissionText(TreeItem<File> treeItem,File file) {
+    //displays submission text in SubmissionDisplay pane and creates Submission object to hold submission info
+    String loadSubmission(TreeItem<File> treeItem,File file) {
         String studentIdDir = treeItem.getParent().getValue().toString();
         String assignmentDir = treeItem.getParent().getParent().getValue().toString();
         String moduleDir = treeItem.getParent().getParent().getParent().getValue().toString();
         String submissionText = "";
 
         Connection conn = DatabaseController.dbConnect();
-        String getSubmission = "SELECT assignmentText FROM ASSIGNMENT_SUBMISSION WHERE assignmentId = ? AND moduleId = ? AND studentId = ? and filename = ?";
+        String getSubmission = "SELECT assignmentText FROM SUBMISSION_FILES WHERE moduleId = ? AND assignmentId = ? AND studentId = ? and filename = ?";
         try(PreparedStatement pstmt = conn.prepareStatement(getSubmission)){
-            pstmt.setString(1, assignmentDir);
-            pstmt.setString(2, moduleDir);
+            pstmt.setString(1, moduleDir);
+            pstmt.setString(2, assignmentDir);
             pstmt.setString(3, studentIdDir);
             pstmt.setString(4, file.toString());
             ResultSet rs = pstmt.executeQuery();
             submissionText = rs.getString(1);
             conn.close();
 
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+       createSubmissionObject(moduleDir, assignmentDir, studentIdDir);
+
         return submissionText;
+    }
+
+    void createSubmissionObject(String moduleId, String assignmentId, String studentId) {
+        Connection conn = DatabaseController.dbConnect();
+        String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE moduleId = ? AND assignmentId = ? AND studentId = ?";
+        try(PreparedStatement pstmt = conn.prepareStatement(getSubmission)){
+            pstmt.setString(1, moduleId);
+            pstmt.setString(2, assignmentId);
+            pstmt.setString(3, studentId);
+            ResultSet rs = pstmt.executeQuery();
+            String gradingRubric = rs.getString(7);
+            String marksReceived = rs.getString(8);
+            double maxMarks = Double.parseDouble(rs.getString(9));
+            double totalMarks = Double.parseDouble(rs.getString(10));
+            String comments = rs.getString(11);
+            conn.close();
+
+            currentSubmission = new SubmissionModel(moduleId, assignmentId, studentId, gradingRubric,
+                    marksReceived, maxMarks, totalMarks, comments);
+
+            System.out.println("moduleId: " + moduleId);
+            System.out.println("assignmentId: " + assignmentId);
+            System.out.println("studentId: " + studentId);
+            System.out.println("gradingRubric: " + gradingRubric);
+            System.out.println("marksReceived: " + marksReceived);
+            System.out.println("maxMarks: " + maxMarks);
+            System.out.println("totalMarks: " + totalMarks);
+            System.out.println("comments: " + comments);
+            System.out.println();
+
+            if(gradingRubric.equals("rubric not set")) {
+                rubric = new String[8];
+                Arrays.fill(rubric, "");
+            } else {
+                rubric = gradingRubric.split(",");
+            }
+
+            criterion1MarkInput.setText(rubric[0]);
+            criterion1NameInput.setText(rubric[1]);
+            criterion2MarkInput.setText(rubric[2]);
+            criterion2NameInput.setText(rubric[3]);
+            criterion3MarkInput.setText(rubric[4]);
+            criterion3NameInput.setText(rubric[5]);
+            criterion4MarkInput.setText(rubric[6]);
+            criterion4NameInput.setText(rubric[7]);
+
+            if(marksReceived.equals("marks not set")) {
+                marks = new String[8];
+                Arrays.fill(marks, "");
+            } else {
+                marks = marksReceived.split(",");
+            }
+
+            criterion1Mark.setText(marks[0]);
+            criterion1Name.setText(marks[1]);
+            criterion2Mark.setText(marks[2]);
+            criterion2Name.setText(marks[3]);
+            criterion3Mark.setText(marks[4]);
+            criterion3Name.setText(marks[5]);
+            criterion4Mark.setText(marks[6]);
+            criterion4Name.setText(marks[7]);
+
+            maxMarksLabel.setText("Max marks: " + maxMarks);
+            marksReceivedLabel.setText("Total marks: " + totalMarks);
+            feedbackTextArea.setText(comments);
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     void createFileTree(File file, TreeItem<File> parent) {
@@ -156,7 +233,7 @@ public class InstructorController {
                 createFileTree(f, fileItem);
             }
         } else {
-            //read in source files and create records in Submission table
+            //read in source files and create records in ASSIGNMENT_SUBMISSION and SUBMISSION_FILES tables
             readFile(file);
         }
     }
@@ -164,14 +241,13 @@ public class InstructorController {
     //submitted assignment files should be in parent directory named with student ID number
     //e.g. CS4123/week03/0347345/helloWorld.c
     void readFile(File file) {
-        String filepath = file.toString();
         //split directories in filepath - "\" for Windows and "/" for Unix/Mac
         String[] splitFilepath = file.toString().split("[\\\\/]");
         String module = splitFilepath[splitFilepath.length-4];
         String assignment = splitFilepath[splitFilepath.length-3];
         String studentID = splitFilepath[splitFilepath.length-2];
         String filename = splitFilepath[splitFilepath.length-1];
-        String submission = "";
+        String submissionText = "";
 
         //read file text
         StringBuilder sb = new StringBuilder();
@@ -184,21 +260,31 @@ public class InstructorController {
                 sb.append(line).append("\n");
                 line = br.readLine();
             }
-            submission = sb.toString();
+            submissionText = sb.toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        //TODO amend Submissions table to include instructorId, AY and semester
         Connection conn = DatabaseController.dbConnect();
-        String insertSubmission = "INSERT INTO ASSIGNMENT_SUBMISSION (moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?)";
-        try(PreparedStatement pstmt = conn.prepareStatement(insertSubmission)){
+        String importSubmissions = "INSERT OR IGNORE INTO ASSIGNMENT_SUBMISSION (instructorId, moduleId, assignmentId, studentId) VALUES (?, ?, ?, ?);";
+        try(PreparedStatement pstmt = conn.prepareStatement(importSubmissions)){
+            pstmt.setString(1, instructor.getInstructorId());
+            pstmt.setString(2, module);
+            pstmt.setString(3, assignment);
+            pstmt.setString(4, studentID);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?);";
+        try(PreparedStatement pstmt = conn.prepareStatement(importSubmissionFiles)){
             pstmt.setString(1, module);
             pstmt.setString(2, assignment);
             pstmt.setString(3, studentID);
             pstmt.setString(4, filename);
-            pstmt.setString(5, submission);
-            pstmt.execute();
+            pstmt.setString(5, submissionText);
+            pstmt.executeUpdate();
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -207,16 +293,23 @@ public class InstructorController {
 
     @FXML
     void setGradingRubric() {
-        maxMarks = Integer.parseInt(criterion1MarkInput.getText()) +
-                Integer.parseInt(criterion2MarkInput.getText()) +
-                Integer.parseInt(criterion3MarkInput.getText()) +
-                Integer.parseInt(criterion4MarkInput.getText());
+        //this will eventually be a loop to go through a list of dynamically created criteria fields but for now
+        //it is hardcoded to four
+
+        currentSubmission.setMaxMarks(Double.parseDouble(criterion1MarkInput.getText()) +
+                Double.parseDouble(criterion2MarkInput.getText()) +
+                Double.parseDouble(criterion3MarkInput.getText()) +
+                Double.parseDouble(criterion4MarkInput.getText()));
 
         criterion1Name.setText("/" + criterion1MarkInput.getText() + " " + criterion1NameInput.getText());
         criterion2Name.setText("/" + criterion2MarkInput.getText() + " " + criterion2NameInput.getText());
         criterion3Name.setText("/" + criterion3MarkInput.getText() + " " + criterion3NameInput.getText());
         criterion4Name.setText("/" + criterion4MarkInput.getText() + " " + criterion4NameInput.getText());
-        maxMarksLabel.setText("Max marks: " + maxMarks);
+        maxMarksLabel.setText("Max marks: " + currentSubmission.getMaxMarks());
+
+        currentSubmission.setGradingRubric(criterion1MarkInput.getText() + ","+ criterion1NameInput.getText() + "," +
+                criterion2MarkInput.getText() + "," + criterion2NameInput.getText() + "," + criterion3MarkInput.getText() + "," +
+                criterion3NameInput.getText() + "," + criterion4MarkInput.getText() + "," + criterion4NameInput.getText());
 
         handleNullMarks();
     }
@@ -240,42 +333,43 @@ public class InstructorController {
     }
 
     @FXML
-    void updateMarksReceived() {
-        marksReceived = Integer.parseInt(criterion1Mark.getText()) +
-                Integer.parseInt(criterion2Mark.getText()) +
-                Integer.parseInt(criterion3Mark.getText()) +
-                Integer.parseInt(criterion4Mark.getText());
+    void updateTotalMarks() {
+        currentSubmission.setTotalMarks(Double.parseDouble(criterion1Mark.getText()) +
+                Double.parseDouble(criterion2Mark.getText()) +
+                Double.parseDouble(criterion3Mark.getText()) +
+                Double.parseDouble(criterion4Mark.getText()));
 
-        marksReceivedLabel.setText("Marks received: " + marksReceived);
+        marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
     }
 
     @FXML
     void saveMarks() {
+        currentSubmission.setComments(feedbackTextArea.getText());
+
+        currentSubmission.setMarksReceived(criterion1Mark.getText() + "," + criterion1Name.getText() + "," +
+                        criterion2Mark.getText() + "," + criterion2Name.getText() + "," +
+                        criterion3Mark.getText()  + "," +  criterion3Name.getText()  + "," +
+                criterion4Mark.getText() + "," + criterion4Name.getText());
+
+        System.out.println(currentSubmission.getMarksReceived());
+
         Connection conn = DatabaseController.dbConnect();
-        String insertSubmission = "UPDATE ASSIGNMENT_SUBMISSION SET maxMarks = ?, receivedMarks = ?, comments = ? " +
-                "WHERE  moduleId = ? AND assignmentId = ? AND studentId = ? and filename = ?";
+        String insertSubmission = "UPDATE ASSIGNMENT_SUBMISSION SET gradingRubric = ?, marksReceived = ?, maxMarks = ?, totalMarks = ?, comments = ? " +
+                "WHERE  moduleId = ? AND assignmentId = ? AND studentId = ?";
         try(PreparedStatement pstmt = conn.prepareStatement(insertSubmission)){
-            pstmt.setString(1, Integer.toString(maxMarks));
-            pstmt.setString(2, Integer.toString(marksReceived));
-            pstmt.setString(3, feedbackTextArea.getText());
-//            pstmt.setString(4, );
-//            pstmt.setString(5, );
-//            pstmt.setString(6, );
-//            pstmt.setString(7, );
+            pstmt.setString(1, currentSubmission.getGradingRubric());
+            pstmt.setString(2, currentSubmission.getMarksReceived());
+            pstmt.setString(3, Double.toString(currentSubmission.getMaxMarks()));
+            pstmt.setString(4, Double.toString(currentSubmission.getTotalMarks()));
+            pstmt.setString(5, currentSubmission.getComments());
+            pstmt.setString(6, currentSubmission.getModuleId() );
+            pstmt.setString(7, currentSubmission.getAssignmentId());
+            pstmt.setString(8, currentSubmission.getStudentId());
             pstmt.execute();
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    void saveRubric() {
-        criterion1Mark.getText();
-        criterion1Name.getText();
-
-        criterion1MarkInput.getText();
-        criterion1NameInput.getText();
-
     }
 
     @FXML
