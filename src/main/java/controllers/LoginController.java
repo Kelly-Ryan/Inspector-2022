@@ -55,7 +55,7 @@ public class LoginController {
 
                         // get controller for current scene
                         InstructorController instructorController = loader.getController();
-                        instructorController.setupDashboard(instructorController, email);
+                        instructorController.setup(instructorController, email);
                     } else {
                         alertController.displayAlert(alertController.incorrectPassword());
                     }
