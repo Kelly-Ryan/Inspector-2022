@@ -40,7 +40,8 @@ public class DatabaseController {
                     "instructorId  INT(10)     NOT NULL REFERENCES INSTRUCTOR(instructorId)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS STUDENT (" +
-                    "studentId  VARCHAR(8) NOT NULL PRIMARY KEY" +
+                    "studentId    VARCHAR(8) NOT NULL PRIMARY KEY," +
+                    "studentEmail VARCHAR(30)" +
                     "); "+
                     "CREATE TABLE IF NOT EXISTS ASSIGNMENT (" +
                     "assignmentId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
@@ -53,6 +54,7 @@ public class DatabaseController {
                     "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
                     "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
                     "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
+                    "studentEmail   VARCHAR(30)," +
                     "gradingRubric VARCHAR(250) DEFAULT 'rubric not set'," +
                     "marksReceived VARCHAR(250) DEFAULT  'marks not set'," +
                     "maxMarks       FLOAT DEFAULT 0.0," +
