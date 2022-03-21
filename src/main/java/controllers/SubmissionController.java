@@ -1,7 +1,12 @@
 package controllers;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -12,17 +17,20 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.QuoteMode;
 
 public class SubmissionController {
     private InstructorModel instructor;
     private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
     private SubmissionModel currentSubmission;
+    List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
+    List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
     String[] rubric, marks;
     @FXML
     private Label username;
@@ -30,44 +38,16 @@ public class SubmissionController {
     private Text submissionDisplay;
     @FXML
     TreeView<File> treeView;
+    @ FXML
+    VBox rubricVBox;
     @FXML
-    private TextField criterion1MarkInput;
-    @FXML
-    private TextField criterion2MarkInput;
-    @FXML
-    private TextField criterion3MarkInput;
-    @FXML
-    private TextField criterion4MarkInput;
-    @FXML
-    private TextField criterion1NameInput;
-    @FXML
-    private TextField criterion2NameInput;
-    @FXML
-    private TextField criterion3NameInput;
-    @FXML
-    private TextField criterion4NameInput;
-    @FXML
-    private TextField criterion1Mark;
-    @FXML
-    private TextField criterion2Mark;
-    @FXML
-    private TextField criterion3Mark;
-    @FXML
-    private TextField criterion4Mark;
-    @FXML
-    private Label criterion1Name;
-    @FXML
-    private Label criterion2Name;
-    @FXML
-    private Label criterion3Name;
-    @FXML
-    private Label criterion4Name;
+    VBox marksVBox;
     @FXML
     private Label maxMarksLabel;
     @FXML
     private Label marksReceivedLabel;
     @FXML
-    private TextArea feedbackTextArea;
+    private TextArea commentsTextArea;
 
     void setInstructor(InstructorModel instructor) {
         this.instructor = instructor;
@@ -142,8 +122,6 @@ public class SubmissionController {
         }
     }
 
-    //submitted assignment files should be in parent directory named with student ID number
-    //e.g. CS4123/week03/0347345/helloWorld.c
     void readFile(File file) {
         //split directories in filepath - "\" for Windows and "/" for Unix/Mac
         String[] splitFilepath = file.toString().split("[\\\\/]");
@@ -196,7 +174,7 @@ public class SubmissionController {
         }
     }
 
-    //displays submission text in SubmissionDisplay pane and creates Submission object to hold submission info
+    //displays submission text, grading rubric and saved marks and creates Submission object to hold submission info
     String loadSubmission(TreeItem<File> treeItem, File file) {
         String studentIdDir = treeItem.getParent().getValue().toString();
         String assignmentDir = treeItem.getParent().getParent().getValue().toString();
@@ -213,13 +191,14 @@ public class SubmissionController {
             ResultSet rs = pstmt.executeQuery();
             submissionText = rs.getString(1);
             conn.close();
-
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         createSubmissionObject(moduleDir, assignmentDir, studentIdDir);
+        loadGradingRubric();
+        loadMarksReceived();
+        loadComments();
 
         return submissionText;
     }
@@ -242,109 +221,158 @@ public class SubmissionController {
             currentSubmission = new SubmissionModel(moduleId, assignmentId, studentId, gradingRubric,
                     marksReceived, maxMarks, totalMarks, comments);
 
-            if (gradingRubric.equals("rubric not set")) {
-                rubric = new String[8];
-                Arrays.fill(rubric, "");
-            } else {
-                rubric = gradingRubric.split(",");
-            }
-
-            criterion1MarkInput.setText(rubric[0]);
-            criterion1NameInput.setText(rubric[1]);
-            criterion2MarkInput.setText(rubric[2]);
-            criterion2NameInput.setText(rubric[3]);
-            criterion3MarkInput.setText(rubric[4]);
-            criterion3NameInput.setText(rubric[5]);
-            criterion4MarkInput.setText(rubric[6]);
-            criterion4NameInput.setText(rubric[7]);
-
-            if (marksReceived.equals("marks not set")) {
-                marks = new String[8];
-                Arrays.fill(marks, "");
-            } else {
-                marks = marksReceived.split(",");
-            }
-
-            criterion1Mark.setText(marks[0]);
-            criterion1Name.setText(marks[1]);
-            criterion2Mark.setText(marks[2]);
-            criterion2Name.setText(marks[3]);
-            criterion3Mark.setText(marks[4]);
-            criterion3Name.setText(marks[5]);
-            criterion4Mark.setText(marks[6]);
-            criterion4Name.setText(marks[7]);
-
-            maxMarksLabel.setText("Max marks: " + maxMarks);
-            marksReceivedLabel.setText("Total marks: " + totalMarks);
-            feedbackTextArea.setText(comments);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
+    // dynamically add criteria to grading rubric
+    public void addCriterion() {
+        TextField criterionMarkInput = new TextField();
+        criterionMarkInput.setMaxWidth(30);
+        TextField criterionNameInput = new TextField();
+        criterionNameInput.setMaxWidth(150);
+        Button removeButton = new Button("X");
+        HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
+        hBox.setSpacing(10);
+
+        removeButton.setOnAction(event -> {
+            rubricVBox.getChildren().remove(hBox);
+            criteriaList.remove(hBox);
+        });
+
+        rubricVBox.getChildren().add(hBox);
+        criteriaList.add(hBox);
+    }
+
+    //TODO prevent existing marks in marks section from being reset when new criteria are
+    // added to rubric - get marks from marksList?
     @FXML
     void setGradingRubric() {
-        //this will eventually be a loop to go through a list of dynamically created criteria fields but for now
-        //it is hardcoded to four
+        int maxMarks = 0;
+        StringBuilder sb = new StringBuilder();     //to store grading rubric info as comma separated values
+        marksVBox.getChildren().clear();
 
-        currentSubmission.setMaxMarks(Double.parseDouble(criterion1MarkInput.getText()) +
-                Double.parseDouble(criterion2MarkInput.getText()) +
-                Double.parseDouble(criterion3MarkInput.getText()) +
-                Double.parseDouble(criterion4MarkInput.getText()));
+        //add existing rubric to criteria list first?
+        for(HBox h : criteriaList) {
+            Node markNode = h.getChildren().get(0);
+            Node nameNode = h.getChildren().get(1);
 
-        criterion1Name.setText("/" + criterion1MarkInput.getText() + " " + criterion1NameInput.getText());
-        criterion2Name.setText("/" + criterion2MarkInput.getText() + " " + criterion2NameInput.getText());
-        criterion3Name.setText("/" + criterion3MarkInput.getText() + " " + criterion3NameInput.getText());
-        criterion4Name.setText("/" + criterion4MarkInput.getText() + " " + criterion4NameInput.getText());
-        maxMarksLabel.setText("Max marks: " + currentSubmission.getMaxMarks());
+            String criterionMark = ((TextField)markNode).getText();
+            String criterionName = ((TextField)nameNode).getText();
 
-        currentSubmission.setGradingRubric(criterion1MarkInput.getText() + "," + criterion1NameInput.getText() + "," +
-                criterion2MarkInput.getText() + "," + criterion2NameInput.getText() + "," + criterion3MarkInput.getText() + "," +
-                criterion3NameInput.getText() + "," + criterion4MarkInput.getText() + "," + criterion4NameInput.getText());
+            //populate marking section with rubric info
+            TextField markTextField = new TextField();
+            markTextField.setMaxWidth(30);
+            markTextField.setOnAction(e -> updateTotalMarks());   //dynamically update marks total as marks are added
+            Label criterionLabel = new Label("/" + criterionMark + " " + criterionName);
+            HBox hBox = new HBox(markTextField, criterionLabel);
+            marksVBox.getChildren().add(hBox);
+
+            maxMarks += Integer.parseInt(criterionMark);
+            marksList.add(markTextField);
+
+            sb.append(criterionMark).append(",").append(criterionName).append(",");
+        }
+
+        currentSubmission.setMaxMarks(maxMarks);
+        maxMarksLabel.setText("Max Marks: " + maxMarks);
+        currentSubmission.setGradingRubric(sb.toString());
 
         handleNullMarks();
     }
 
-    void handleNullMarks() {
-        if (criterion1Mark.getText().isEmpty()) {
-            criterion1Mark.setText("0");
+    //TODO fix total marks calculation
+    @FXML
+    void updateTotalMarks() {
+        double totalMarks = 0.0;
+        for(TextField mark : marksList) {
+            totalMarks = Double.parseDouble(mark.getText());
         }
+        currentSubmission.setTotalMarks(totalMarks);
+        marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
+    }
 
-        if (criterion2Mark.getText().isEmpty()) {
-            criterion2Mark.setText("0");
-        }
+    void loadGradingRubric() {
+        rubricVBox.getChildren().clear();
+        if (!currentSubmission.getGradingRubric().equals("rubric not set")) {
+            rubric = currentSubmission.getGradingRubric().split(",");
+            for (int i = 0; i <= rubric.length - 2; i += 2) {
+                TextField criterionMarkInput = new TextField();
+                criterionMarkInput.setMaxWidth(30);
+                criterionMarkInput.setText(rubric[i]);
+                TextField criterionNameInput = new TextField();
+                criterionNameInput.setMaxWidth(150);
+                criterionNameInput.setText(rubric[i + 1]);
+                criterionNameInput.setMaxWidth(150);
+                Button removeButton = new Button("X");
+                HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
+                hBox.setSpacing(10);
+                rubricVBox.getChildren().add(hBox);
 
-        if (criterion3Mark.getText().isEmpty()) {
-            criterion3Mark.setText("0");
-        }
-
-        if (criterion4Mark.getText().isEmpty()) {
-            criterion4Mark.setText("0");
+                removeButton.setOnAction(event -> rubricVBox.getChildren().remove(hBox));
+            }
         }
     }
 
-    @FXML
-    void updateTotalMarks() {
-        currentSubmission.setTotalMarks(Double.parseDouble(criterion1Mark.getText()) +
-                Double.parseDouble(criterion2Mark.getText()) +
-                Double.parseDouble(criterion3Mark.getText()) +
-                Double.parseDouble(criterion4Mark.getText()));
+    void handleNullMarks() {
+        for(TextField mark : marksList) {
+            if(mark.getText().isEmpty()) {
+                mark.setText("0");
+            }
+        }
+    }
 
+    void setMarksReceived() {
+        // create string of comma separated values to store marks received
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < criteriaList.size(); i++) {
+            Node markNode = criteriaList.get(i).getChildren().get(0);
+            Node nameNode = criteriaList.get(i).getChildren().get(1);
+
+            String mark = marksList.get(i).getText();
+            String criterionMark = ((TextField)markNode).getText();
+            String criterionName = ((TextField)nameNode).getText();
+
+            sb.append(mark).append(",").append("/").append(criterionMark).append(" ").append(criterionName).append(",");
+        }
+
+        currentSubmission.setMarksReceived(sb.toString());
+    }
+
+    void loadMarksReceived() {
+        marksVBox.getChildren().clear();
+        if (!currentSubmission.getMarksReceived().equals("marks not set")) {
+            marks = currentSubmission.getMarksReceived().split(",");
+
+            for (int i = 0; i <= marks.length - 2; i += 2) {
+                TextField markTextField = new TextField();
+                markTextField.setMaxWidth(30);
+                markTextField.setText(marks[i]);
+                markTextField.setOnMouseExited(e -> updateTotalMarks());   //dynamically update marks total as marks are added
+                Label criterionLabel = new Label(marks[i + 1]);
+                HBox hBox = new HBox(markTextField, criterionLabel);
+                hBox.setSpacing(10);
+                marksVBox.getChildren().add(hBox);
+            }
+        }
+
+        maxMarksLabel.setText("Max marks: " + currentSubmission.getMaxMarks());
         marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
+    }
+
+    void setComments() {
+        currentSubmission.setComments(commentsTextArea.getText());
+    }
+
+    void loadComments() {
+        commentsTextArea.setText(currentSubmission.getComments());
     }
 
     @FXML
     void saveMarks() {
-        currentSubmission.setComments(feedbackTextArea.getText());
-
-        currentSubmission.setMarksReceived(criterion1Mark.getText() + "," + criterion1Name.getText() + "," +
-                criterion2Mark.getText() + "," + criterion2Name.getText() + "," +
-                criterion3Mark.getText() + "," + criterion3Name.getText() + "," +
-                criterion4Mark.getText() + "," + criterion4Name.getText());
-
-        System.out.println(currentSubmission.getMarksReceived());
+        setMarksReceived();
+        setComments();
 
         Connection conn = DatabaseController.dbConnect();
         String insertSubmission = "UPDATE ASSIGNMENT_SUBMISSION SET gradingRubric = ?, marksReceived = ?, maxMarks = ?, totalMarks = ?, comments = ? " +
