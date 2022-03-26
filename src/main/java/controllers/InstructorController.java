@@ -32,6 +32,9 @@ public class InstructorController {
             instructor = new InstructorModel(instructorId, name, email);
             submissionController.setInstructor(instructor);
 
+            // prepare source code display area
+            submissionController.setUpSourceCodeDisplay();
+
             // import files
             submissionController.displayFileTree(submissionController.treeView);
 

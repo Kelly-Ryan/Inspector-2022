@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InstructorController">
+    <MenuBar>
+        <Menu mnemonicParsing="false" text="_File">
+         <MenuItem id="setImportDirMenuItem" fx:id="setImportDirMenuItem" mnemonicParsing="false" onAction="#setImportDirectory" text="set import directory..." />
+         <SeparatorMenuItem mnemonicParsing="false" />
+         <MenuItem id="closeMenuItem" fx:id="closeMenuItem" mnemonicParsing="false" onAction="#exitApplication" text="Close" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="_Help">
+            <MenuItem mnemonicParsing="false" text="About" />
+        </Menu>
+    </MenuBar>
+        <fx:include fx:id="submission" source="SubmissionView.fxml" />
+</VBox>

@@ -1,13 +1,10 @@
 package controllers;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import models.InstructorModel;
@@ -17,25 +14,26 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
 
 public class SubmissionController {
     private InstructorModel instructor;
-    private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
+    //private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
+    private File importDirectory = new File("");
     private SubmissionModel currentSubmission;
-    List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
-    List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
-    String[] rubric, marks;
+    private CodeArea codeArea;
+    private List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
+    private List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
+    private String[] rubric, marks;
     @FXML
     private Label username;
     @FXML
-    private Text submissionDisplay;
+    private ScrollPane sourceCodeScrollPane;
     @FXML
     TreeView<File> treeView;
     @ FXML
@@ -90,7 +88,8 @@ public class SubmissionController {
                     TreeItem<File> treeItem = cell.getTreeItem();
                     File file = treeItem.getValue();
                     if (treeItem.isLeaf()) {
-                        submissionDisplay.setText(loadSubmission(treeItem, file));
+                        codeArea.clear();
+                        codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
                     }
                 }
             });
@@ -172,6 +171,17 @@ public class SubmissionController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    void setUpSourceCodeDisplay() {
+        codeArea = new CodeArea();
+        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+        codeArea = new CodeArea();
+        codeArea.setEditable(false);
+        codeArea.setMinWidth(1200);
+        codeArea.setMinHeight(700);
+        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+        sourceCodeScrollPane.setContent(codeArea);
     }
 
     //displays submission text, grading rubric and saved marks and creates Submission object to hold submission info
