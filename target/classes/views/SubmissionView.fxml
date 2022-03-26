@@ -46,12 +46,13 @@
          </HBox>
       </children>
    </VBox>
-   <VBox>
+   <VBox alignment="CENTER">
       <children>
          <ScrollPane fx:id="sourceCodeScrollPane" hbarPolicy="ALWAYS" minWidth="600.0" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
-         <ButtonBar prefHeight="40.0" prefWidth="200.0">
+         <ButtonBar maxWidth="200.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="27.0" prefWidth="182.0">
            <buttons>
-             <Button mnemonicParsing="false" text="Button" />
+               <Button layoutX="852.0" layoutY="16.0" mnemonicParsing="false" text="Next" textAlignment="CENTER" />
+             <Button alignment="CENTER" contentDisplay="CENTER" ellipsisString="" mnemonicParsing="false" text="Previous" textAlignment="CENTER" />
            </buttons>
          </ButtonBar>
       </children>

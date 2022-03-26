@@ -2,12 +2,9 @@ package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import models.InstructorModel;
@@ -17,19 +14,17 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
 public class SubmissionController {
     private InstructorModel instructor;
-    private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
+    //private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
+    private File importDirectory = new File("");
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
     private List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
@@ -39,8 +34,6 @@ public class SubmissionController {
     private Label username;
     @FXML
     private ScrollPane sourceCodeScrollPane;
-    @FXML
-    private Text submissionDisplay;
     @FXML
     TreeView<File> treeView;
     @ FXML
@@ -182,9 +175,11 @@ public class SubmissionController {
 
     void setUpSourceCodeDisplay() {
         codeArea = new CodeArea();
+        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+        codeArea = new CodeArea();
+        codeArea.setEditable(false);
         codeArea.setMinWidth(1200);
         codeArea.setMinHeight(700);
-        //codeArea.setWrapText(true);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         sourceCodeScrollPane.setContent(codeArea);
     }
