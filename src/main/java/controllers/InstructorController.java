@@ -20,16 +20,17 @@ public class InstructorController {
 
         //sql query to initialize InstructorModel object
         Connection conn = DatabaseController.dbConnect();
-        String sql = "SELECT instructorId, name FROM INSTRUCTOR WHERE email = ?";
+        String sql = "SELECT instructorId, name, importDirectory FROM INSTRUCTOR WHERE email = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, email);
             ResultSet rs = pstmt.executeQuery();
             int instructorId = Integer.parseInt(rs.getString(1));
             String name = rs.getString(2);
+            String importDirectory = rs.getString(3);
             conn.close();
 
             // set instructor info
-            instructor = new InstructorModel(instructorId, name, email);
+            instructor = new InstructorModel(instructorId, name, email, importDirectory);
             submissionController.setInstructor(instructor);
 
             // prepare source code display area

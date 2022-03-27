@@ -1,12 +1,14 @@
 package controllers;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import models.AlertModel;
 import models.InstructorModel;
 import models.SubmissionModel;
 
@@ -14,6 +16,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.apache.commons.csv.CSVFormat;
@@ -21,15 +25,16 @@ import org.apache.commons.csv.CSVPrinter;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
+import javax.swing.*;
+
 public class SubmissionController {
+    AlertController alertController = new AlertController();
     private InstructorModel instructor;
-    //private File importDirectory = new File("C:\\Users\\mcnei\\OneDrive - University of Limerick\\CS4617 FYP\\official documents\\Inspector\\assignments");
-    private File importDirectory = new File("");
+    public File importDirectory;
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
-    private List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
-    private List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
-    private String[] rubric, marks;
+    private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
+    private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
     @FXML
     private Label username;
     @FXML
@@ -46,10 +51,20 @@ public class SubmissionController {
     private Label marksReceivedLabel;
     @FXML
     private TextArea commentsTextArea;
+    @FXML
+    private TextField moduleCodeTextField;
+    @FXML
+    private TextField assignmentCodeTextField;
 
     void setInstructor(InstructorModel instructor) {
         this.instructor = instructor;
         username.setText("Hello, " + instructor.getName());
+
+        if(instructor.getImportDirectory() == null) {
+            importDirectory = new File("");
+        } else {
+            importDirectory = new File(instructor.getImportDirectory());
+        }
     }
 
     @FXML
@@ -58,6 +73,20 @@ public class SubmissionController {
         File directory = directoryChooser.showDialog(new Stage());
         if (directory != null) {
             importDirectory = directory;
+            //TODO write to DB
+
+            Connection conn = DatabaseController.dbConnect();
+            String sql = "UPDATE INSTRUCTOR SET importDirectory = ? where email = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, importDirectory.toString());
+                pstmt.setString(2, instructor.getEmail());
+                pstmt.execute();
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+
         }
         //load module directories from newly selected import directory
         displayFileTree(treeView);
@@ -99,10 +128,15 @@ public class SubmissionController {
         //get file list from importDirectory
         File[] fileList = importDirectory.listFiles();
 
-        //populate tree
-        assert fileList != null;
-        for (File file : fileList) {
-            createFileTree(file, rootItem);
+        try {
+            //populate tree
+            assert fileList != null;
+            for (File file : fileList) {
+                createFileTree(file, rootItem);
+            }
+        } catch (RuntimeException e) {
+            alertController.displayAlert(new AlertModel("Import Directory", "Import directory not set." +
+                    "\nSelect an import directory from\nFile > set import directory"));
         }
     }
 
@@ -159,13 +193,14 @@ public class SubmissionController {
             e.printStackTrace();
         }
 
-        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?);";
+        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (instructorId, moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(importSubmissionFiles)) {
-            pstmt.setString(1, module);
-            pstmt.setString(2, assignment);
-            pstmt.setString(3, studentID);
-            pstmt.setString(4, filename);
-            pstmt.setString(5, submissionText);
+            pstmt.setString(1, instructor.getInstructorId());
+            pstmt.setString(2, module);
+            pstmt.setString(3, assignment);
+            pstmt.setString(4, studentID);
+            pstmt.setString(5, filename);
+            pstmt.setString(6, submissionText);
             pstmt.executeUpdate();
             conn.close();
         } catch (SQLException e) {
@@ -249,6 +284,7 @@ public class SubmissionController {
         removeButton.setOnAction(event -> {
             rubricVBox.getChildren().remove(hBox);
             criteriaList.remove(hBox);
+            loadMarksReceived();
         });
 
         rubricVBox.getChildren().add(hBox);
@@ -274,9 +310,12 @@ public class SubmissionController {
             //populate marking section with rubric info
             TextField markTextField = new TextField();
             markTextField.setMaxWidth(30);
-            markTextField.setOnAction(e -> updateTotalMarks());   //dynamically update marks total as marks are added
+
+            markTextField.setOnMouseExited((e -> updateTotalMarks()));   //dynamically update marks total as marks are added
+
             Label criterionLabel = new Label("/" + criterionMark + " " + criterionName);
             HBox hBox = new HBox(markTextField, criterionLabel);
+            hBox.setAlignment(Pos.CENTER_LEFT);
             marksVBox.getChildren().add(hBox);
 
             maxMarks += Integer.parseInt(criterionMark);
@@ -292,12 +331,19 @@ public class SubmissionController {
         handleNullMarks();
     }
 
-    //TODO fix total marks calculation
     @FXML
     void updateTotalMarks() {
-        double totalMarks = 0.0;
+        System.out.println("updateTotalMarks called");
+        System.out.println(marksList.size());
+
+        double totalMarks = 0;
+
         for(TextField mark : marksList) {
-            totalMarks = Double.parseDouble(mark.getText());
+            totalMarks += Double.parseDouble(mark.getText());
+
+            //DEBUG
+            System.out.println(mark.getText());
+            System.out.println(totalMarks);
         }
         currentSubmission.setTotalMarks(totalMarks);
         marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
@@ -306,7 +352,7 @@ public class SubmissionController {
     void loadGradingRubric() {
         rubricVBox.getChildren().clear();
         if (!currentSubmission.getGradingRubric().equals("rubric not set")) {
-            rubric = currentSubmission.getGradingRubric().split(",");
+            String[] rubric = currentSubmission.getGradingRubric().split(",");
             for (int i = 0; i <= rubric.length - 2; i += 2) {
                 TextField criterionMarkInput = new TextField();
                 criterionMarkInput.setMaxWidth(30);
@@ -319,6 +365,8 @@ public class SubmissionController {
                 HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
                 hBox.setSpacing(10);
                 rubricVBox.getChildren().add(hBox);
+
+                criteriaList.add(hBox);
 
                 removeButton.setOnAction(event -> rubricVBox.getChildren().remove(hBox));
             }
@@ -353,21 +401,27 @@ public class SubmissionController {
     void loadMarksReceived() {
         marksVBox.getChildren().clear();
         if (!currentSubmission.getMarksReceived().equals("marks not set")) {
-            marks = currentSubmission.getMarksReceived().split(",");
+            String[] marks = currentSubmission.getMarksReceived().split(",");
 
             for (int i = 0; i <= marks.length - 2; i += 2) {
                 TextField markTextField = new TextField();
                 markTextField.setMaxWidth(30);
                 markTextField.setText(marks[i]);
-                markTextField.setOnMouseExited(e -> updateTotalMarks());   //dynamically update marks total as marks are added
+
+                marksList.add(markTextField);
+
+                markTextField.setOnMouseExited(e -> updateTotalMarks());
+
                 Label criterionLabel = new Label(marks[i + 1]);
                 HBox hBox = new HBox(markTextField, criterionLabel);
+                hBox.setAlignment(Pos.CENTER_LEFT);
                 hBox.setSpacing(10);
                 marksVBox.getChildren().add(hBox);
             }
         }
 
         maxMarksLabel.setText("Max marks: " + currentSubmission.getMaxMarks());
+        updateTotalMarks();
         marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
     }
 
@@ -405,13 +459,27 @@ public class SubmissionController {
 
     @FXML
     void export() {
+        String module = moduleCodeTextField.getText();
+        String assignment = assignmentCodeTextField.getText();
+
+        // clear textfields
+        moduleCodeTextField.clear();
+        assignmentCodeTextField.clear();
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HH_mm_ss_");
+        LocalDateTime now = LocalDateTime.now();
+        String csvFile = "C:\\Users\\mcnei\\Desktop\\Inspector\\results\\" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+
         Connection conn = DatabaseController.dbConnect();
-        String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION";
-        try(Statement stmt = conn.createStatement()){
-            ResultSet rs = stmt.executeQuery(getSubmission);
+        String sql = "SELECT moduleId, assignmentId, studentId, studentEmail, gradingRubric, marksReceived, maxMarks, " +
+                "totalMarks, comments FROM ASSIGNMENT_SUBMISSION WHERE moduleId = ? AND assignmentId = ?";
+        try(PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, module);
+            pstmt.setString(2, assignment);
+            ResultSet rs = pstmt.executeQuery();
 
             // create CSV file
-            BufferedWriter writer = Files.newBufferedWriter(Paths.get("data.csv"));
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFile));
 
             // add headers to CSV file
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT);
@@ -428,21 +496,16 @@ public class SubmissionController {
                     rs.getString(6),
                     rs.getString(7),
                     rs.getString(8),
-                    rs.getString(9),
-                    rs.getString(10),
-                    rs.getString(11),
-                    rs.getString(12));
+                    rs.getString(9));
             }
             conn.close();
             csvPrinter.flush();
             csvPrinter.close();
 
-            // Message stating export successful.
-            System.out.println("Data export successful.");
+            alertController.displayAlert(new AlertModel("Data Export", "Results successfully exported."));
 
         } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
-
     }
 }
