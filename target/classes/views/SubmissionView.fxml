@@ -43,7 +43,7 @@
          </VBox>
          <HBox alignment="CENTER" spacing="30.0">
             <children>
-               <Button mnemonicParsing="false" onAction="#setGradingRubric" text="Set Rubric" />
+               <Button mnemonicParsing="false" onAction="#modifyGradingRubric" text="Set Rubric" />
                <Button mnemonicParsing="false" onAction="#addCriterion" text="Add" />
             </children>
             <padding>

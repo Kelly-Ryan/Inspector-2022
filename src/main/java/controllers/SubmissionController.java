@@ -28,7 +28,6 @@ import org.fxmisc.richtext.LineNumberFactory;
 
 public class SubmissionController {
     AlertController alertController = new AlertController();
-    DialogController dialogController = new DialogController();
     private InstructorModel instructor;
     public File importDirectory;
     private SubmissionModel currentSubmission;
@@ -292,17 +291,21 @@ public class SubmissionController {
     }
 
     public void removeCriterion(HBox hBox) {
-        System.out.println("criteriaList size before:" + criteriaList.size());
         rubricVBox.getChildren().remove(hBox);
-        System.out.println(criteriaList.contains(hBox));
         criteriaList.remove(hBox);
-        System.out.println("criteriaList size after:" + criteriaList.size());
     }
 
-    //TODO prevent existing marks in marks section from being reset when new criteria are
-    // added to rubric - get marks from marksList?
     @FXML
-    void setGradingRubric() {
+    public void modifyGradingRubric() {
+        if(!currentSubmission.getGradingRubric().equals("rubric not set")) {
+            DialogController dialogController = new DialogController(this);
+            dialogController.displayDialog("ModifyRubricDialogView.fxml", "Change Grading Rubric");
+        } else {
+            setGradingRubric();
+        }
+    }
+
+    public void setGradingRubric() {
         int maxMarks = 0;
         StringBuilder sb = new StringBuilder();     //to store grading rubric info as comma separated values
         marksVBox.getChildren().clear();
@@ -367,11 +370,10 @@ public class SubmissionController {
                 Button removeButton = new Button("X");
                 HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
                 hBox.setSpacing(10);
+                removeButton.setOnAction(event -> removeCriterion(hBox));
                 rubricVBox.getChildren().add(hBox);
 
                 criteriaList.add(hBox);
-
-                removeButton.setOnAction(event -> removeCriterion(  hBox));
             }
         }
     }
@@ -418,13 +420,12 @@ public class SubmissionController {
                 Label criterionLabel = new Label(marks[i + 1]);
                 HBox hBox = new HBox(markTextField, criterionLabel);
                 hBox.setAlignment(Pos.CENTER_LEFT);
-                hBox.setSpacing(10);
                 marksVBox.getChildren().add(hBox);
             }
         }
 
-        maxMarksLabel.setText("Max marks: " + currentSubmission.getMaxMarks());
         updateTotalMarks();
+        maxMarksLabel.setText("Max marks: " + currentSubmission.getMaxMarks());
         marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
     }
 
