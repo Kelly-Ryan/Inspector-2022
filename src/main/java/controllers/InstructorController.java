@@ -50,6 +50,11 @@ public class InstructorController {
     }
 
     @FXML
+    void setResultsDirectory() {
+        submissionController.setResultsDirectory();
+    }
+
+    @FXML
     void exitApplication(){
         DialogController dialogController = new DialogController();
         dialogController.displayDialog("ExitApplicationDialogView.fxml", "Exit Application");
