@@ -26,9 +26,10 @@ public class DatabaseController {
             //define database tables
             String sql = "CREATE TABLE IF NOT EXISTS INSTRUCTOR (" +
                     "instructorId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
-                    "name           VARCHAR(100) NOT NULL," +
-                    "email          VARCHAR(100) NOT NULL," +
-                    "password       VARCHAR(20)  NOT NULL," +
+                    "name               VARCHAR(100) NOT NULL," +
+                    "email              VARCHAR(100) NOT NULL," +
+                    "password           VARCHAR(20)  NOT NULL," +
+                    "importDirectory    VARCHAR(250)," +
                     "UNIQUE (email)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS MODULE (" +
@@ -60,15 +61,16 @@ public class DatabaseController {
                     "maxMarks       FLOAT DEFAULT 0.0," +
                     "totalMarks     FLOAT DEFAULT 0.0," +
                     "comments       VARCHAR(1000) DEFAULT 'no comments'," +
-                    "CONSTRAINT COMP_KEY PRIMARY KEY (moduleId, assignmentId, studentId)" +
+                    "CONSTRAINT COMP_KEY PRIMARY KEY (instructorId, moduleId, assignmentId, studentId)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS SUBMISSION_FILES (" +
+                    "instructorId	INT(10) NOT NULL REFERENCES INSTRUCTOR(InstructorId)," +
                     "moduleId       INT(10) NOT NULL REFERENCES MODULE(moduleId)," +
                     "assignmentId   INT(10) NOT NULL REFERENCES ASSIGNMENT(assignmentId)," +
                     "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
                     "filename       VARCHAR(50) NOT NULL," +
                     "assignmentText MEDIUMTEXT NOT NULL," +
-                    "CONSTRAINT COMP_KEY PRIMARY KEY (moduleId, assignmentId, studentId, filename)" +
+                    "CONSTRAINT COMP_KEY PRIMARY KEY (instructorId, moduleId, assignmentId, studentId, filename)" +
                     ");";
             //create database tables
             stmt.executeUpdate(sql);

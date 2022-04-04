@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e7bcf102-c87b-49b6-9028-4e60d75cf62b" name="Changes" comment="Line numbers displayed in source code area with RichTextFX.">
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_fxmisc_flowless_flowless_0_6_9.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_fxmisc_richtext_richtextfx_0_10_9.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_fxmisc_undo_undofx_2_1_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_fxmisc_wellbehaved_wellbehavedfx_0_3_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_reactfx_reactfx_2_0_M5.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Inspector.iml" beforeDir="false" afterPath="$PROJECT_DIR$/Inspector.iml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="XML Properties File" />
+        <option value="CSS File" />
+        <option value="FxmlFile" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dynamic-criteria-insertion" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JsbtTreeLayoutManager">
+    <layout place="tools.popupGrunt">
+      <scroll-view-position x="0" y="0" />
+    </layout>
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="23A8BUxzVNCsoaHu6fEly0vgheo" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="sqlite" />
+    <property name="Downloaded.Files.Path.Enabled" value="false" />
+    <property name="Repository.Attach.Annotations" value="false" />
+    <property name="Repository.Attach.JavaDocs" value="false" />
+    <property name="Repository.Attach.Sources" value="false" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="TODO_SCOPE" value="All Places" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/SQL Dialect" value="SQLite" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources/db/inspector.db" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\mcnei\OneDrive - University of Limerick\CS4617 FYP\official documents\Inspector\src\main\resources" />
+      <recent name="C:\Users\mcnei\OneDrive - University of Limerick\CS4617 FYP\official documents\Inspector\src\main\resources\css" />
+      <recent name="C:\Users\mcnei\OneDrive - University of Limerick\CS4617 FYP\official documents\Inspector\resources" />
+      <recent name="C:\Users\mcnei\OneDrive - University of Limerick\CS4617 FYP\official documents\Inspector\src\views" />
+      <recent name="C:\Users\mcnei\OneDrive - University of Limerick\CS4617 FYP\official documents\Inspector\src\controllers" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.Main">
+    <configuration name="Main" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="Main" />
+      <module name="Inspector" />
+      <option name="VM_PARAMETERS" value="--module-path &quot;.\lib\javafx-sdk-17.0.2\lib&quot; --add-modules javafx.controls,javafx.fxml" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="RichTextFX" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="controllers.CodeDisplayController" />
+      <module name="Inspector" />
+      <option name="VM_PARAMETERS" value="--module-path &quot;.\lib\javafx-sdk-17.0.2\lib&quot; --add-modules javafx.controls,javafx.fxml" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.Main" />
+      <item itemvalue="Application.RichTextFX" />
+    </list>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e7bcf102-c87b-49b6-9028-4e60d75cf62b" name="Changes" comment="" />
+      <created>1641165398330</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1641165398330</updated>
+      <workItem from="1641165399440" duration="5813000" />
+      <workItem from="1641227508637" duration="11174000" />
+      <workItem from="1641250827162" duration="5700000" />
+      <workItem from="1641410669127" duration="1363000" />
+      <workItem from="1641501820660" duration="887000" />
+      <workItem from="1641849705673" duration="3000" />
+      <workItem from="1642719416062" duration="5741000" />
+      <workItem from="1642879031824" duration="11878000" />
+      <workItem from="1643037269470" duration="14321000" />
+      <workItem from="1643143367522" duration="649000" />
+      <workItem from="1643475176037" duration="24014000" />
+      <workItem from="1643558820028" duration="14110000" />
+      <workItem from="1643726238901" duration="14405000" />
+      <workItem from="1643745142792" duration="3365000" />
+      <workItem from="1643840878186" duration="9003000" />
+      <workItem from="1643889206534" duration="3525000" />
+      <workItem from="1643922803386" duration="3231000" />
+      <workItem from="1643974163977" duration="11898000" />
+      <workItem from="1644069296531" duration="19628000" />
+      <workItem from="1644181985714" duration="15309000" />
+      <workItem from="1644584179291" duration="19768000" />
+      <workItem from="1644606096107" duration="18068000" />
+      <workItem from="1644685066777" duration="6840000" />
+      <workItem from="1644793649945" duration="2469000" />
+      <workItem from="1644930895744" duration="20566000" />
+      <workItem from="1645035053768" duration="10236000" />
+      <workItem from="1645125147290" duration="1368000" />
+      <workItem from="1645126895141" duration="11356000" />
+      <workItem from="1645195672246" duration="1319000" />
+      <workItem from="1645472379055" duration="11000" />
+      <workItem from="1645997356170" duration="7483000" />
+      <workItem from="1646238404451" duration="7745000" />
+      <workItem from="1646325772227" duration="1089000" />
+      <workItem from="1646326873616" duration="2608000" />
+      <workItem from="1646403159346" duration="1006000" />
+      <workItem from="1646500681438" duration="30000" />
+      <workItem from="1646590707834" duration="1960000" />
+      <workItem from="1646694142530" duration="608000" />
+      <workItem from="1646747347970" duration="3487000" />
+      <workItem from="1646751055609" duration="21331000" />
+      <workItem from="1646778644026" duration="213000" />
+      <workItem from="1646830261241" duration="5559000" />
+      <workItem from="1647275213338" duration="24524000" />
+      <workItem from="1647431668911" duration="56000" />
+      <workItem from="1647608281386" duration="11972000" />
+      <workItem from="1647698041238" duration="6000" />
+      <workItem from="1647883717500" duration="16332000" />
+      <workItem from="1647964605462" duration="3044000" />
+      <workItem from="1648136616729" duration="13424000" />
+      <workItem from="1648234174712" duration="1779000" />
+      <workItem from="1648313748285" duration="19789000" />
+    </task>
+    <task id="LOCAL-00001" summary="Initial commit">
+      <created>1642889899926</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1642889899926</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Extract module code, assignment name and student ID from file path.">
+      <created>1642895783408</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1642895783408</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Display file contents in application window with JavaFX.">
+      <created>1643061908167</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1643061908167</updated>
+    </task>
+    <task id="LOCAL-00004" summary="User can select single or multiple files to be displayed in application window. Module code, assignment name and student ID is also extracted during this process.">
+      <created>1643493245657</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1643493245657</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Implemented TreeView to display directories and files contained therein.">
+      <created>1643574921239</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1643574921239</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Implemented login and registration screen for new and existing users with some minor CSS styling. Registration of new user inserts new record into Instructor table in database.">
+      <created>1643850376545</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1643850376545</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Added some data validation and duplicate email address checking for new users.">
+      <created>1644086109018</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1644086109018</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Added db file.">
+      <created>1644086799687</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1644086799687</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Rebuit login view with SceneBuilder. Added LoginController and DialogBoxController.">
+      <created>1644105874602</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1644105874602</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Before Maven support added.">
+      <created>1644594584975</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1644594584975</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Maven framework support added.&#10;Converted programmatically defined UI elements to SceneBuilder/fxml.&#10;Implemented AlertModel, AlertView and AlertController.&#10;Implemented DialogModel, DialogView and DialogController.">
+      <created>1644684604863</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1644684604863</updated>
+    </task>
+    <task id="LOCAL-00012" summary="On successful login scene transitions from LoginView.fxml to InstructorView.fxml.">
+      <created>1644796114835</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1644796114835</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Fixed resize issue on scene change.">
+      <created>1644932158095</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1644932158095</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Import directory can by set by the user and all module directories, subdirectories and files are traversed and added to the treeview.">
+      <created>1645041914429</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1645041914429</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Clicking on imported files in the TreeView will display their source code in the submissionDisplay.">
+      <created>1645137099036</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1645137099036</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Clicking on imported files in the TreeView will display their source code in the submissionDisplay.">
+      <created>1645997625673</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1645997625673</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Grading rubric can be set and updated. Marks applied are automatically calculated.">
+      <created>1646749439534</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1646749439535</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Restructured Assignment_Submission table and created Submission_Files table to allow for submissions with more than one source file.">
+      <created>1646778851987</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1646778851987</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Grading rubric, marks applied and feedback can now be saved to ASSIGNMENT_SUBMISSION table.">
+      <created>1646848576702</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1646848576702</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Saved grading rubric, marks applied and comments are displayed in fields when saved submission is loaded. Fixed issue of SQL exception being thrown when non-file tree nodes were being clicked.">
+      <created>1647278123631</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1647278123631</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Refactored InstructorController and SubmissionController logic to separate functionality. Implemented export() method so data from graded assignments is exported to a csv file.">
+      <created>1647296165252</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1647296165252</updated>
+    </task>
+    <task id="LOCAL-00022" summary="criteria can also be removed.">
+      <created>1647897995717</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1647897995717</updated>
+    </task>
+    <task id="LOCAL-00023" summary="added fxml files to git.">
+      <created>1648141300764</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1648141300764</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Line numbers displayed in source code area with RichTextFX.">
+      <created>1648149749990</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1648149749990</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Line numbers displayed in source code area with RichTextFX.">
+      <created>1648314822276</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1648314822276</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial commit" />
+    <MESSAGE value="Extract module code, assignment name and student ID from file path." />
+    <MESSAGE value="Display file contents in application window with JavaFX." />
+    <MESSAGE value="User can select single or multiple files to be displayed in application window. Module code, assignment name and student ID is also extracted during this process." />
+    <MESSAGE value="Implemented TreeView to display directories and files contained therein." />
+    <MESSAGE value="Implemented login and registration screen for new and existing users with some minor CSS styling. Registration of new user inserts new record into Instructor table in database." />
+    <MESSAGE value="Added some data validation and duplicate email address checking for new users." />
+    <MESSAGE value="Added db file." />
+    <MESSAGE value="Rebuit login view with SceneBuilder. Added LoginController and DialogBoxController." />
+    <MESSAGE value="Before Maven support added." />
+    <MESSAGE value="Maven framework support added.&#10;Converted programmatically defined UI elements to SceneBuilder/fxml.&#10;Implemented AlertModel, AlertView and AlertController.&#10;Implemented DialogModel, DialogView and DialogController." />
+    <MESSAGE value="On successful login scene transitions from LoginView.fxml to InstructorView.fxml." />
+    <MESSAGE value="Fixed resize issue on scene change." />
+    <MESSAGE value="Import directory can by set by the user and all module directories, subdirectories and files are traversed and added to the treeview." />
+    <MESSAGE value="Clicking on imported files in the TreeView will display their source code in the submissionDisplay." />
+    <MESSAGE value="Grading rubric can be set and updated. Marks applied are automatically calculated." />
+    <MESSAGE value="Restructured Assignment_Submission table and created Submission_Files table to allow for submissions with more than one source file." />
+    <MESSAGE value="Grading rubric, marks applied and feedback can now be saved to ASSIGNMENT_SUBMISSION table." />
+    <MESSAGE value="Saved grading rubric, marks applied and comments are displayed in fields when saved submission is loaded. Fixed issue of SQL exception being thrown when non-file tree nodes were being clicked." />
+    <MESSAGE value="Refactored InstructorController and SubmissionController logic to separate functionality. Implemented export() method so data from graded assignments is exported to a csv file." />
+    <MESSAGE value="Implemented dynamic creation of grading rubric criteria that is populated to the marking section. Saved grading rubric and marking data is retrieved for a submission when that submission is selected." />
+    <MESSAGE value="criteria can also be removed." />
+    <MESSAGE value="added fxml files to git." />
+    <MESSAGE value="Line numbers displayed in source code area with RichTextFX." />
+    <option name="LAST_COMMIT_MESSAGE" value="Line numbers displayed in source code area with RichTextFX." />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
