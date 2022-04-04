@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<VBox id="vBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.DialogController">
+<Text id="messageText" strokeType="OUTSIDE" text="Modifying the existing rubric will cause any existing marks to be reset to 0. Do you want to proceed?" textAlignment="JUSTIFY" wrappingWidth="200.0" />
+<HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="40.0">
+    <Button id="confirmButton" mnemonicParsing="false" onAction="#setGradingRubric" text="Confirm" />
+    <Button id="cancelButton" mnemonicParsing="false" onAction="#cancelDialog" text="Cancel" />
+</HBox>
+</VBox>

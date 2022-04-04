@@ -7,47 +7,51 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import models.DialogModel;
 
 import java.io.IOException;
 import java.util.Objects;
 
 public class DialogController {
-    private DialogController dialogController;
+    private static SubmissionController submissionController;
     private static Stage stage;
-    @FXML private Text messageText;
+    private Parent root = null;
 
-    public void displayDialog(DialogModel dialog) {
-        Parent root = null;
+    public DialogController() {
+
+    }
+
+    public DialogController(SubmissionController submissionController) {
+        DialogController.submissionController = submissionController;
+    }
+
+    public void displayDialog(String view, String title) {
         try {
-            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/DialogView.fxml")));
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader()
+                    .getResource("views/" + view)));
             root = loader.load();
-            dialogController = loader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //set message text
-        dialogController.messageText.setText(dialog.getMessageText());
 
         //set stage/window properties
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.getIcons().add(new Image("images/inspector_logo.png"));
-        stage.setTitle(dialog.getTitle());
+        stage.setTitle(title);
         assert root != null;
-        stage.setScene(new Scene(root, 300, 200));
+        stage.setScene(new Scene(root));
         stage.showAndWait();
     }
 
-    public DialogModel closeProgram(){
-        return new DialogModel("Exit Application", "Are you sure you want to exit Inspector?");
+    public void setGradingRubric() {
+        stage.close();
+        DialogController.submissionController.setGradingRubric();
     }
 
     @FXML
-    private void closeDialog(ActionEvent e){
+    private void cancelDialog(ActionEvent e){
         e.consume();
         stage.close();
     }

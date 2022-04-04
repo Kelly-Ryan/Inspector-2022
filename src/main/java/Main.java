@@ -42,6 +42,6 @@ public class Main extends Application {
     @FXML
     public void exitApplication() {
         DialogController dialogController = new DialogController();
-        dialogController.displayDialog(dialogController.closeProgram());
+        dialogController.displayDialog("ExitApplicationDialogView.fxml", "Exit Application");
     }
 }
