@@ -30,6 +30,7 @@ public class DatabaseController {
                     "email              VARCHAR(100) NOT NULL," +
                     "password           VARCHAR(20)  NOT NULL," +
                     "importDirectory    VARCHAR(250)," +
+                    "resultsDirectory   VARCHAR(250)," +
                     "UNIQUE (email)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS MODULE (" +

@@ -9,12 +9,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import models.AlertModel;
-import models.DialogModel;
 import models.InstructorModel;
 import models.SubmissionModel;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -29,31 +29,21 @@ import org.fxmisc.richtext.LineNumberFactory;
 public class SubmissionController {
     AlertController alertController = new AlertController();
     private InstructorModel instructor;
-    public File importDirectory;
+    private File importDirectory, resultsDirectory;
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
-    @FXML
-    private Label username;
-    @FXML
-    private ScrollPane sourceCodeScrollPane;
-    @FXML
-    TreeView<File> treeView;
-    @ FXML
-    VBox rubricVBox;
-    @FXML
-    VBox marksVBox;
-    @FXML
-    private Label maxMarksLabel;
-    @FXML
-    private Label marksReceivedLabel;
-    @FXML
-    private TextArea commentsTextArea;
-    @FXML
-    private TextField moduleCodeTextField;
-    @FXML
-    private TextField assignmentCodeTextField;
+    @FXML private Label username;
+    @FXML private ScrollPane sourceCodeScrollPane;
+    @FXML TreeView<File> treeView;
+    @FXML VBox rubricVBox;
+    @FXML VBox marksVBox;
+    @FXML private Label maxMarksLabel;
+    @FXML private Label marksReceivedLabel;
+    @FXML private TextArea commentsTextArea;
+    @FXML private TextField moduleCodeTextField;
+    @FXML private TextField assignmentCodeTextField;
 
     void setInstructor(InstructorModel instructor) {
         this.instructor = instructor;
@@ -72,8 +62,6 @@ public class SubmissionController {
         File directory = directoryChooser.showDialog(new Stage());
         if (directory != null) {
             importDirectory = directory;
-            //TODO write to DB
-
             Connection conn = DatabaseController.dbConnect();
             String sql = "UPDATE INSTRUCTOR SET importDirectory = ? where email = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -84,8 +72,6 @@ public class SubmissionController {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
-
         }
         //load module directories from newly selected import directory
         displayFileTree(treeView);
@@ -180,7 +166,8 @@ public class SubmissionController {
         }
 
         Connection conn = DatabaseController.dbConnect();
-        String importSubmissions = "INSERT OR IGNORE INTO ASSIGNMENT_SUBMISSION (instructorId, moduleId, assignmentId, studentId, studentEmail) VALUES (?, ?, ?, ?, ?);";
+        String importSubmissions = "INSERT OR IGNORE INTO ASSIGNMENT_SUBMISSION (instructorId, moduleId, assignmentId, " +
+                "studentId, studentEmail) VALUES (?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(importSubmissions)) {
             pstmt.setString(1, instructor.getInstructorId());
             pstmt.setString(2, module);
@@ -192,7 +179,8 @@ public class SubmissionController {
             e.printStackTrace();
         }
 
-        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (instructorId, moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?, ?);";
+        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (instructorId, moduleId, assignmentId, " +
+                "studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(importSubmissionFiles)) {
             pstmt.setString(1, instructor.getInstructorId());
             pstmt.setString(2, module);
@@ -229,7 +217,8 @@ public class SubmissionController {
         String submissionText = "";
 
         Connection conn = DatabaseController.dbConnect();
-        String getSubmission = "SELECT assignmentText FROM SUBMISSION_FILES WHERE instructorId = ? AND moduleId = ? AND assignmentId = ? AND studentId = ? and filename = ?";
+        String getSubmission = "SELECT assignmentText FROM SUBMISSION_FILES WHERE instructorId = ? AND moduleId = ? AND " +
+                "assignmentId = ? AND studentId = ? and filename = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(getSubmission)) {
             pstmt.setString(1, instructor.getInstructorId());
             pstmt.setString(2, moduleDir);
@@ -253,7 +242,8 @@ public class SubmissionController {
 
     void createSubmissionObject(String moduleId, String assignmentId, String studentId) {
         Connection conn = DatabaseController.dbConnect();
-        String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND assignmentId = ? AND studentId = ?";
+        String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND " +
+                "assignmentId = ? AND studentId = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(getSubmission)) {
             pstmt.setString(1, instructor.getInstructorId());
             pstmt.setString(2, moduleId);
@@ -443,8 +433,8 @@ public class SubmissionController {
         setComments();
 
         Connection conn = DatabaseController.dbConnect();
-        String insertSubmission = "UPDATE ASSIGNMENT_SUBMISSION SET gradingRubric = ?, marksReceived = ?, maxMarks = ?, totalMarks = ?, comments = ? " +
-                "WHERE  moduleId = ? AND assignmentId = ? AND studentId = ?";
+        String insertSubmission = "UPDATE ASSIGNMENT_SUBMISSION SET gradingRubric = ?, marksReceived = ?, maxMarks = ?, " +
+                "totalMarks = ?, comments = ? WHERE  moduleId = ? AND assignmentId = ? AND studentId = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(insertSubmission)) {
             pstmt.setString(1, currentSubmission.getGradingRubric());
             pstmt.setString(2, currentSubmission.getMarksReceived());
@@ -456,8 +446,28 @@ public class SubmissionController {
             pstmt.setString(8, currentSubmission.getStudentId());
             pstmt.execute();
             conn.close();
+
+            alertController.displayAlert(new AlertModel("Data Saved", "Results successfully saved."));
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    void setResultsDirectory() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File directory = directoryChooser.showDialog(new Stage());
+        if (directory != null) {
+            resultsDirectory = directory;
+            Connection conn = DatabaseController.dbConnect();
+            String sql = "UPDATE INSTRUCTOR SET resultsDirectory = ? where email = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, resultsDirectory.toString());
+                pstmt.setString(2, instructor.getEmail());
+                pstmt.execute();
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -466,13 +476,9 @@ public class SubmissionController {
         String module = moduleCodeTextField.getText();
         String assignment = assignmentCodeTextField.getText();
 
-        // clear textfields
-        moduleCodeTextField.clear();
-        assignmentCodeTextField.clear();
-
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HH_mm_ss_");
         LocalDateTime now = LocalDateTime.now();
-        String csvFile = "C:\\Users\\mcnei\\Desktop\\Inspector\\results\\" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+        String csvFile = resultsDirectory + "\\" + dtf.format(now) + module + "_" + assignment +"_results.csv";
 
         Connection conn = DatabaseController.dbConnect();
         String sql = "SELECT moduleId, assignmentId, studentId, studentEmail, gradingRubric, marksReceived, maxMarks, " +
@@ -493,21 +499,29 @@ public class SubmissionController {
             // Add data rows to CSV file.
             while (rs.next()) {
                 csvPrinter.printRecord(
-                    rs.getString(1),
-                    rs.getString(2),
-                    rs.getString(3),
-                    rs.getString(4),
-                    rs.getString(5),
-                    rs.getString(6),
-                    rs.getString(7),
-                    rs.getString(8),
-                    rs.getString(9));
+                        rs.getString(1),
+                        rs.getString(2),
+                        rs.getString(3),
+                        rs.getString(4),
+                        rs.getString(5),
+                        rs.getString(6),
+                        rs.getString(7),
+                        rs.getString(8),
+                        rs.getString(9));
             }
             conn.close();
             csvPrinter.flush();
             csvPrinter.close();
 
+            // clear textfields
+            moduleCodeTextField.clear();
+            assignmentCodeTextField.clear();
+
             alertController.displayAlert(new AlertModel("Data Export", "Results successfully exported."));
+
+        } catch (NoSuchFileException e) {
+            alertController.displayAlert(new AlertModel("Results Directory", "Results directory not set." +
+                    "\nSelect a results directory from\nFile > set results directory"));
 
         } catch (IOException | SQLException e) {
             e.printStackTrace();
