@@ -70,7 +70,7 @@ public class DatabaseController {
                     "studentId      VARCHAR(8)  NOT NULL REFERENCES STUDENT(studentId)," +
                     "filename       VARCHAR(50) NOT NULL," +
                     "assignmentText MEDIUMTEXT NOT NULL," +
-                    "CONSTRAINT COMP_KEY PRIMARY KEY (moduleId, assignmentId, studentId, filename)" +
+                    "CONSTRAINT COMP_KEY PRIMARY KEY (instructorId, moduleId, assignmentId, studentId, filename)" +
                     ");";
             //create database tables
             stmt.executeUpdate(sql);

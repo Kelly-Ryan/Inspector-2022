@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import models.AlertModel;
+import models.DialogModel;
 import models.InstructorModel;
 import models.SubmissionModel;
 
@@ -25,10 +26,9 @@ import org.apache.commons.csv.CSVPrinter;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
-import javax.swing.*;
-
 public class SubmissionController {
     AlertController alertController = new AlertController();
+    DialogController dialogController = new DialogController();
     private InstructorModel instructor;
     public File importDirectory;
     private SubmissionModel currentSubmission;
@@ -193,7 +193,7 @@ public class SubmissionController {
             e.printStackTrace();
         }
 
-        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (instructorId, moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?);";
+        String importSubmissionFiles = " INSERT OR IGNORE INTO SUBMISSION_FILES (instructorId, moduleId, assignmentId, studentId, filename, assignmentText) VALUES (?, ?, ?, ?, ?, ?);";
         try (PreparedStatement pstmt = conn.prepareStatement(importSubmissionFiles)) {
             pstmt.setString(1, instructor.getInstructorId());
             pstmt.setString(2, module);
@@ -221,18 +221,22 @@ public class SubmissionController {
 
     //displays submission text, grading rubric and saved marks and creates Submission object to hold submission info
     String loadSubmission(TreeItem<File> treeItem, File file) {
+        criteriaList.clear();
+        marksList.clear();
+
         String studentIdDir = treeItem.getParent().getValue().toString();
         String assignmentDir = treeItem.getParent().getParent().getValue().toString();
         String moduleDir = treeItem.getParent().getParent().getParent().getValue().toString();
         String submissionText = "";
 
         Connection conn = DatabaseController.dbConnect();
-        String getSubmission = "SELECT assignmentText FROM SUBMISSION_FILES WHERE moduleId = ? AND assignmentId = ? AND studentId = ? and filename = ?";
+        String getSubmission = "SELECT assignmentText FROM SUBMISSION_FILES WHERE instructorId = ? AND moduleId = ? AND assignmentId = ? AND studentId = ? and filename = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(getSubmission)) {
-            pstmt.setString(1, moduleDir);
-            pstmt.setString(2, assignmentDir);
-            pstmt.setString(3, studentIdDir);
-            pstmt.setString(4, file.toString());
+            pstmt.setString(1, instructor.getInstructorId());
+            pstmt.setString(2, moduleDir);
+            pstmt.setString(3, assignmentDir);
+            pstmt.setString(4, studentIdDir);
+            pstmt.setString(5, file.toString());
             ResultSet rs = pstmt.executeQuery();
             submissionText = rs.getString(1);
             conn.close();
@@ -250,11 +254,12 @@ public class SubmissionController {
 
     void createSubmissionObject(String moduleId, String assignmentId, String studentId) {
         Connection conn = DatabaseController.dbConnect();
-        String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE moduleId = ? AND assignmentId = ? AND studentId = ?";
+        String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND assignmentId = ? AND studentId = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(getSubmission)) {
-            pstmt.setString(1, moduleId);
-            pstmt.setString(2, assignmentId);
-            pstmt.setString(3, studentId);
+            pstmt.setString(1, instructor.getInstructorId());
+            pstmt.setString(2, moduleId);
+            pstmt.setString(3, assignmentId);
+            pstmt.setString(4, studentId);
             ResultSet rs = pstmt.executeQuery();
             String gradingRubric = rs.getString(8);
             String marksReceived = rs.getString(9);
@@ -280,15 +285,18 @@ public class SubmissionController {
         Button removeButton = new Button("X");
         HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
         hBox.setSpacing(10);
-
-        removeButton.setOnAction(event -> {
-            rubricVBox.getChildren().remove(hBox);
-            criteriaList.remove(hBox);
-            loadMarksReceived();
-        });
+        removeButton.setOnAction(e -> removeCriterion(hBox));
 
         rubricVBox.getChildren().add(hBox);
         criteriaList.add(hBox);
+    }
+
+    public void removeCriterion(HBox hBox) {
+        System.out.println("criteriaList size before:" + criteriaList.size());
+        rubricVBox.getChildren().remove(hBox);
+        System.out.println(criteriaList.contains(hBox));
+        criteriaList.remove(hBox);
+        System.out.println("criteriaList size after:" + criteriaList.size());
     }
 
     //TODO prevent existing marks in marks section from being reset when new criteria are
@@ -298,8 +306,8 @@ public class SubmissionController {
         int maxMarks = 0;
         StringBuilder sb = new StringBuilder();     //to store grading rubric info as comma separated values
         marksVBox.getChildren().clear();
+        marksList.clear();
 
-        //add existing rubric to criteria list first?
         for(HBox h : criteriaList) {
             Node markNode = h.getChildren().get(0);
             Node nameNode = h.getChildren().get(1);
@@ -311,7 +319,8 @@ public class SubmissionController {
             TextField markTextField = new TextField();
             markTextField.setMaxWidth(30);
 
-            markTextField.setOnMouseExited((e -> updateTotalMarks()));   //dynamically update marks total as marks are added
+            //dynamically update marks total as marks are added
+            markTextField.setOnMouseExited((e -> updateTotalMarks()));
 
             Label criterionLabel = new Label("/" + criterionMark + " " + criterionName);
             HBox hBox = new HBox(markTextField, criterionLabel);
@@ -333,18 +342,12 @@ public class SubmissionController {
 
     @FXML
     void updateTotalMarks() {
-        System.out.println("updateTotalMarks called");
-        System.out.println(marksList.size());
-
         double totalMarks = 0;
 
         for(TextField mark : marksList) {
             totalMarks += Double.parseDouble(mark.getText());
-
-            //DEBUG
-            System.out.println(mark.getText());
-            System.out.println(totalMarks);
         }
+
         currentSubmission.setTotalMarks(totalMarks);
         marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
     }
@@ -368,7 +371,7 @@ public class SubmissionController {
 
                 criteriaList.add(hBox);
 
-                removeButton.setOnAction(event -> rubricVBox.getChildren().remove(hBox));
+                removeButton.setOnAction(event -> removeCriterion(  hBox));
             }
         }
     }
@@ -396,6 +399,7 @@ public class SubmissionController {
         }
 
         currentSubmission.setMarksReceived(sb.toString());
+        criteriaList.clear();
     }
 
     void loadMarksReceived() {
@@ -407,10 +411,9 @@ public class SubmissionController {
                 TextField markTextField = new TextField();
                 markTextField.setMaxWidth(30);
                 markTextField.setText(marks[i]);
+                markTextField.setOnMouseExited(e -> updateTotalMarks());
 
                 marksList.add(markTextField);
-
-                markTextField.setOnMouseExited(e -> updateTotalMarks());
 
                 Label criterionLabel = new Label(marks[i + 1]);
                 HBox hBox = new HBox(markTextField, criterionLabel);
@@ -472,10 +475,11 @@ public class SubmissionController {
 
         Connection conn = DatabaseController.dbConnect();
         String sql = "SELECT moduleId, assignmentId, studentId, studentEmail, gradingRubric, marksReceived, maxMarks, " +
-                "totalMarks, comments FROM ASSIGNMENT_SUBMISSION WHERE moduleId = ? AND assignmentId = ?";
+                "totalMarks, comments FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND assignmentId = ?";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, module);
-            pstmt.setString(2, assignment);
+            pstmt.setString(1, instructor.getInstructorId());
+            pstmt.setString(2, module);
+            pstmt.setString(3, assignment);
             ResultSet rs = pstmt.executeQuery();
 
             // create CSV file
