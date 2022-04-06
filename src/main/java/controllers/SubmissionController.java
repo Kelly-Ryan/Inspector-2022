@@ -361,6 +361,7 @@ public class SubmissionController {
                 HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
                 hBox.setSpacing(10);
                 removeButton.setOnAction(event -> removeCriterion(hBox));
+
                 rubricVBox.getChildren().add(hBox);
 
                 criteriaList.add(hBox);
@@ -391,7 +392,6 @@ public class SubmissionController {
         }
 
         currentSubmission.setMarksReceived(sb.toString());
-        criteriaList.clear();
     }
 
     void loadMarksReceived() {
@@ -453,7 +453,8 @@ public class SubmissionController {
         }
     }
 
-    void setResultsDirectory() {
+    @FXML
+    void setExportDirectory() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         File directory = directoryChooser.showDialog(new Stage());
         if (directory != null) {
