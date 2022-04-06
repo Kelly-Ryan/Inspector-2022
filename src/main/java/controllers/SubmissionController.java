@@ -453,7 +453,8 @@ public class SubmissionController {
         }
     }
 
-    void setResultsDirectory() {
+    @FXML
+    void setExportDirectory() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         File directory = directoryChooser.showDialog(new Stage());
         if (directory != null) {
