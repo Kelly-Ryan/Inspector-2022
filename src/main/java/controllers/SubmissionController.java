@@ -361,6 +361,7 @@ public class SubmissionController {
                 HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
                 hBox.setSpacing(10);
                 removeButton.setOnAction(event -> removeCriterion(hBox));
+
                 rubricVBox.getChildren().add(hBox);
 
                 criteriaList.add(hBox);
@@ -391,7 +392,6 @@ public class SubmissionController {
         }
 
         currentSubmission.setMarksReceived(sb.toString());
-        criteriaList.clear();
     }
 
     void loadMarksReceived() {
