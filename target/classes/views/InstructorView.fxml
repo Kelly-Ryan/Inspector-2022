@@ -9,13 +9,13 @@
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InstructorController">
     <MenuBar>
         <Menu mnemonicParsing="false" text="_File">
-         <MenuItem id="setImportDirMenuItem" fx:id="setImportDirMenuItem" mnemonicParsing="false" onAction="#setImportDirectory" text="set import directory..." />
+         <MenuItem id="setImportDirMenuItem" mnemonicParsing="false" onAction="#setImportDirectory" text="set import directory..." />
          <SeparatorMenuItem mnemonicParsing="false" />
-         <MenuItem id="closeMenuItem" fx:id="closeMenuItem" mnemonicParsing="false" onAction="#exitApplication" text="Close" />
+         <MenuItem id="closeMenuItem" mnemonicParsing="false" onAction="#exitApplication" text="Close" />
         </Menu>
         <Menu mnemonicParsing="false" text="_Help">
             <MenuItem mnemonicParsing="false" text="About" />
         </Menu>
     </MenuBar>
-        <fx:include fx:id="submission" source="SubmissionView.fxml" />
+    <fx:include fx:id="submissionView" source="SubmissionView.fxml" />
 </VBox>

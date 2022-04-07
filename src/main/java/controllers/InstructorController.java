@@ -2,6 +2,7 @@ package controllers;
 
 import javafx.fxml.FXML;
 
+import javafx.scene.Parent;
 import models.InstructorModel;
 
 import java.sql.Connection;
@@ -12,8 +13,8 @@ import java.sql.SQLException;
 public class InstructorController {
     InstructorController instructorController;
     public InstructorModel instructor;
-
-    @FXML SubmissionController submissionController;
+    @FXML private Parent submissionView;
+    @FXML SubmissionController submissionViewController;
 
     void setup(InstructorController instructorController, String email){
         this.instructorController = instructorController;
@@ -31,13 +32,13 @@ public class InstructorController {
 
             // set instructor info
             instructor = new InstructorModel(instructorId, name, email, importDirectory);
-            submissionController.setInstructor(instructor);
+            submissionViewController.setInstructor(instructor);
 
             // prepare source code display area
-            submissionController.setUpSourceCodeDisplay();
+            submissionViewController.setUpSourceCodeDisplay();
 
             // import files
-            submissionController.displayFileTree(submissionController.treeView);
+            submissionViewController.displayFileTree(submissionViewController.treeView);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -46,7 +47,7 @@ public class InstructorController {
 
     @FXML
     void setImportDirectory() {
-        submissionController.setImportDirectory();
+        submissionViewController.setImportDirectory();
     }
 
     @FXML
