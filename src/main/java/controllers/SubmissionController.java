@@ -32,6 +32,7 @@ public class SubmissionController {
     private File importDirectory, resultsDirectory;
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
+    private String lastUsedRubric = "";
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
     @FXML private Label username;
@@ -329,6 +330,7 @@ public class SubmissionController {
         currentSubmission.setMaxMarks(maxMarks);
         maxMarksLabel.setText("Max Marks: " + maxMarks);
         currentSubmission.setGradingRubric(sb.toString());
+        lastUsedRubric = sb.toString();
 
         handleNullMarks();
     }
@@ -345,27 +347,33 @@ public class SubmissionController {
         marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
     }
 
+    void parseGradingRubric(String rubricString) {
+        String[] rubric = rubricString.split(",");
+        for (int i = 0; i <= rubric.length - 2; i += 2) {
+            TextField criterionMarkInput = new TextField();
+            criterionMarkInput.setMaxWidth(30);
+            criterionMarkInput.setText(rubric[i]);
+            TextField criterionNameInput = new TextField();
+            criterionNameInput.setMaxWidth(150);
+            criterionNameInput.setText(rubric[i + 1]);
+            criterionNameInput.setMaxWidth(150);
+            Button removeButton = new Button("X");
+            HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
+            hBox.setSpacing(10);
+            removeButton.setOnAction(event -> removeCriterion(hBox));
+
+            rubricVBox.getChildren().add(hBox);
+
+            criteriaList.add(hBox);
+        }
+    }
+
     void loadGradingRubric() {
         rubricVBox.getChildren().clear();
-        if (!currentSubmission.getGradingRubric().equals("rubric not set")) {
-            String[] rubric = currentSubmission.getGradingRubric().split(",");
-            for (int i = 0; i <= rubric.length - 2; i += 2) {
-                TextField criterionMarkInput = new TextField();
-                criterionMarkInput.setMaxWidth(30);
-                criterionMarkInput.setText(rubric[i]);
-                TextField criterionNameInput = new TextField();
-                criterionNameInput.setMaxWidth(150);
-                criterionNameInput.setText(rubric[i + 1]);
-                criterionNameInput.setMaxWidth(150);
-                Button removeButton = new Button("X");
-                HBox hBox = new HBox(criterionMarkInput, criterionNameInput, removeButton);
-                hBox.setSpacing(10);
-                removeButton.setOnAction(event -> removeCriterion(hBox));
-
-                rubricVBox.getChildren().add(hBox);
-
-                criteriaList.add(hBox);
-            }
+        if (currentSubmission.getGradingRubric().equals("rubric not set")) {
+            parseGradingRubric(lastUsedRubric);
+        } else {
+            parseGradingRubric(currentSubmission.getGradingRubric());
         }
     }
 
