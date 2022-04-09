@@ -1,5 +1,7 @@
 package controllers;
 
+import com.sun.source.tree.Tree;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -84,6 +86,10 @@ public class SubmissionController {
         treeView.setShowRoot(false);
         treeView.setRoot(rootItem);
 
+        // TreeView/TreeItem styling
+        PseudoClass parentElementPseudoClass = PseudoClass.getPseudoClass("parent-tree-item");
+        PseudoClass gradedElementPseudoClass = PseudoClass.getPseudoClass("graded-tree-item");
+
         treeView.setCellFactory(tv -> {
             TreeCell<File> cell = new TreeCell<>() {
                 @Override
@@ -96,6 +102,7 @@ public class SubmissionController {
                     }
                 }
             };
+
             cell.setOnMouseClicked(event -> {
                 if (!cell.isEmpty()) {
                     //display submission text when filename is clicked
@@ -107,12 +114,19 @@ public class SubmissionController {
                     }
                 }
             });
+
+            // apply CSS PseudoClasses to cells
+            cell.treeItemProperty().addListener((obs, oldTreeItem, newTreeItem) -> cell.pseudoClassStateChanged(parentElementPseudoClass,
+                    newTreeItem != null && newTreeItem.getParent() == cell.getTreeView().getRoot()));
+
+            cell.treeItemProperty().addListener((obs, oldTreeItem, newTreeItem) -> cell.pseudoClassStateChanged(gradedElementPseudoClass,
+                    newTreeItem != null && checkSubmissionGraded(newTreeItem)));
+
             return cell;
         });
 
         //get file list from importDirectory
         File[] fileList = importDirectory.listFiles();
-
         try {
             //populate tree
             assert fileList != null;
@@ -193,6 +207,44 @@ public class SubmissionController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    boolean checkSubmissionGraded(TreeItem<File> treeItem) {
+        // for studentId folders containing source code files
+        boolean graded = false;
+
+        try{
+            if(treeItem.getChildren().get(0).isLeaf()) {
+                String studentId = treeItem.getValue().toString();
+                String assignment = treeItem.getParent().getValue().toString();
+                String module = treeItem.getParent().getParent().getValue().toString();
+
+                Connection conn = DatabaseController.dbConnect();
+                String marksReceived = "";
+                String sql = "SELECT marksReceived FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND " +
+                        "assignmentId = ? AND studentId = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, instructor.getInstructorId());
+                    pstmt.setString(2, module);
+                    pstmt.setString(3, assignment);
+                    pstmt.setString(4, studentId);
+                    ResultSet rs = pstmt.executeQuery();
+                    marksReceived = rs.getString(1);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                if(!marksReceived.equals("marks not set")) {
+                    graded = true;
+                }
+            }
+
+        } catch (IndexOutOfBoundsException | NullPointerException e) {
+            return graded;
+        }
+
+        return graded;
     }
 
     void setUpSourceCodeDisplay() {
