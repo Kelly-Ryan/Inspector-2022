@@ -32,7 +32,6 @@ public class SubmissionController {
     private File importDirectory, resultsDirectory;
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
-    private String lastUsedRubric = "";
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
     @FXML private Label username;
@@ -330,7 +329,7 @@ public class SubmissionController {
         currentSubmission.setMaxMarks(maxMarks);
         maxMarksLabel.setText("Max Marks: " + maxMarks);
         currentSubmission.setGradingRubric(sb.toString());
-        lastUsedRubric = sb.toString();
+        instructor.setLastUsedRubric(sb.toString());
 
         handleNullMarks();
     }
@@ -370,10 +369,27 @@ public class SubmissionController {
 
     void loadGradingRubric() {
         rubricVBox.getChildren().clear();
+
+        // if assignment has not been graded load last saved rubric
         if (currentSubmission.getGradingRubric().equals("rubric not set")) {
-            parseGradingRubric(lastUsedRubric);
+            if(instructor.getLastUsedRubric() != null) {
+                parseGradingRubric(instructor.getLastUsedRubric());
+            }
         } else {
             parseGradingRubric(currentSubmission.getGradingRubric());
+        }
+    }
+
+    void saveLastUsedRubric() {
+        Connection conn = DatabaseController.dbConnect();
+        String  sql= "UPDATE INSTRUCTOR SET lastUsedRubric = ? WHERE  instructorId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, instructor.getLastUsedRubric());
+            pstmt.setString(2, instructor.getInstructorId());
+            pstmt.execute();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -437,6 +453,7 @@ public class SubmissionController {
 
     @FXML
     void saveMarks() {
+        saveLastUsedRubric();
         setMarksReceived();
         setComments();
 

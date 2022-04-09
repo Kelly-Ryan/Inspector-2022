@@ -31,6 +31,7 @@ public class DatabaseController {
                     "password           VARCHAR(20)  NOT NULL," +
                     "importDirectory    VARCHAR(250)," +
                     "resultsDirectory   VARCHAR(250)," +
+                    "lastUsedRubric     VARCHAR(250) DEFAULT ''," +
                     "UNIQUE (email)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS MODULE (" +
