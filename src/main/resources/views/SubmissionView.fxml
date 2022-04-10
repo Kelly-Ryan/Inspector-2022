@@ -12,10 +12,10 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubmissionController">
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubmissionController">
    <VBox>
       <VBox prefHeight="400.0" prefWidth="243.0" stylesheets="@../css/styles.css">
-         <Label id="username" fx:id="username" styleClass="section-heading">
+         <Label id="username" fx:id="username" focusTraversable="false" styleClass="section-heading">
             <VBox.margin>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </VBox.margin>
@@ -45,11 +45,11 @@
       </HBox>
    </VBox>
    <VBox alignment="CENTER">
-      <ScrollPane fx:id="sourceCodeScrollPane" hbarPolicy="ALWAYS" minWidth="600.0" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
-      <ButtonBar maxWidth="200.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="27.0" prefWidth="182.0">
+      <ScrollPane fx:id="sourceCodeScrollPane" focusTraversable="false" hbarPolicy="ALWAYS" minWidth="600.0" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
+      <ButtonBar focusTraversable="false" maxWidth="200.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="27.0" prefWidth="182.0">
          <buttons>
-            <Button layoutX="852.0" layoutY="16.0" mnemonicParsing="false" text="Next" textAlignment="CENTER" />
-            <Button alignment="CENTER" contentDisplay="CENTER" ellipsisString="" mnemonicParsing="false" text="Previous" textAlignment="CENTER" />
+            <Button alignment="CENTER" contentDisplay="CENTER" ellipsisString="" mnemonicParsing="false" onAction="#nextSubmission" text="Next" textAlignment="CENTER" />
+            <Button layoutX="852.0" layoutY="16.0" mnemonicParsing="false" onAction="#previousSubmission" text="Previous" textAlignment="CENTER" />
          </buttons>
          <VBox.margin>
             <Insets />
@@ -67,7 +67,7 @@
          <VBox.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </VBox.margin>
-         <Label styleClass="section-heading" text="Marks" textAlignment="CENTER" />
+         <Label focusTraversable="false" styleClass="section-heading" text="Marks" textAlignment="CENTER" />
       </HBox>
       <VBox fx:id="marksVBox" alignment="CENTER_LEFT">
          <padding>
@@ -96,7 +96,7 @@
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </padding>
-         <Label styleClass="section-heading" text="Feedback" />
+         <Label focusTraversable="false" styleClass="section-heading" text="Feedback" />
          <TextArea id="commentsTextArea" fx:id="commentsTextArea" prefHeight="400.0" prefWidth="200.0" wrapText="true" />
          <Button mnemonicParsing="false" onAction="#saveMarks" text="Save" />
       </VBox>
@@ -108,26 +108,24 @@
          <padding>
             <Insets bottom="10.0" right="10.0" top="10.0" />
          </padding>
-         <Label styleClass="section-heading" text="Export to CSV" />
+         <Label focusTraversable="false" styleClass="section-heading" text="Export to CSV" />
          <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="266.0" spacing="10.0">
             <padding>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding>
-            <Label text="Module:" />
+            <Label focusTraversable="false" text="Module:" />
             <TextField fx:id="moduleCodeTextField" alignment="CENTER_RIGHT" minWidth="0.0" prefWidth="110.0" />
          </HBox>
          <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
             <padding>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding>
-            <Label text="Assignment:" />
+            <Label focusTraversable="false" text="Assignment:" />
             <TextField fx:id="assignmentCodeTextField" alignment="CENTER_RIGHT" minWidth="0.0" prefWidth="110.0" />
          </HBox>
          <HBox alignment="CENTER_RIGHT" spacing="20.0">
-            <children>
-               <Button mnemonicParsing="false" onAction="#export" text="Export" />
-               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#setExportDirectory" text="Set Export Directory" />
-            </children>
+            <Button mnemonicParsing="false" onAction="#export" text="Export" />
+            <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#setExportDirectory" text="Set Export Directory" />
          </HBox>
       </VBox>
    </VBox>

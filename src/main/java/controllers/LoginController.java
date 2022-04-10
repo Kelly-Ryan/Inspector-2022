@@ -23,6 +23,10 @@ public class LoginController {
     @FXML
     void login(ActionEvent actionEvent) {
         actionEvent.consume();
+
+        //set focus to loginEmailField
+        loginEmailField.requestFocus();
+
         String email = loginEmailField.getText();
         String password = loginPasswordField.getText();
         if(email.isEmpty() || password.isEmpty()) {

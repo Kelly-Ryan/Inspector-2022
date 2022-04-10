@@ -2,10 +2,17 @@ package controllers;
 
 import com.sun.source.tree.Tree;
 import javafx.css.PseudoClass;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -34,6 +41,8 @@ public class SubmissionController {
     private File importDirectory, resultsDirectory;
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
+    private TreeItem<File> selectedSubmission;
+    private TreeCell<File> treeCell;
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
     @FXML private Label username;
@@ -46,6 +55,45 @@ public class SubmissionController {
     @FXML private TextArea commentsTextArea;
     @FXML private TextField moduleCodeTextField;
     @FXML private TextField assignmentCodeTextField;
+
+    void initializeListeners() {
+        Scene scene = treeView.getScene();
+
+        //display submission text when "Enter" is pressed on filename
+        treeView.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                TreeItem<File> treeItem = treeView.getSelectionModel().getSelectedItem();
+                if (treeItem != null && keyEvent.getCode().equals(KeyCode.ENTER)) {
+                    File file = treeItem.getValue();
+                    if (treeItem.isLeaf()) {
+                        codeArea.clear();
+                        codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
+                    }
+                }
+            } else if (keyEvent.getCode().equals(KeyCode.BRACELEFT)) {
+                previousSubmission();
+            } else if (keyEvent.getCode().equals(KeyCode.BRACERIGHT)) {
+                nextSubmission();
+            }
+        });
+
+        KeyCombination ctrlS = new KeyCodeCombination(KeyCode.S, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlE = new KeyCodeCombination(KeyCode.E, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
+
+        scene.setOnKeyReleased(event -> {
+            if (ctrlS.match(event)) {
+                saveMarks();
+            }  else if (ctrlE.match(event)) {
+                export();
+            }  else if (ctrlA.match(event)) {
+                addCriterion();
+            } else if (ctrlR.match(event)) {
+                modifyGradingRubric();
+            }
+        });
+    }
 
     void setInstructor(InstructorModel instructor) {
         this.instructor = instructor;
@@ -108,6 +156,7 @@ public class SubmissionController {
                     //display submission text when filename is clicked
                     TreeItem<File> treeItem = cell.getTreeItem();
                     File file = treeItem.getValue();
+                    treeCell = cell;
                     if (treeItem.isLeaf()) {
                         codeArea.clear();
                         codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
@@ -133,6 +182,9 @@ public class SubmissionController {
             for (File file : fileList) {
                 createFileTree(file, rootItem);
             }
+
+            treeView.requestFocus();
+
         } catch (RuntimeException e) {
             alertController.displayAlert(new AlertModel("Import Directory", "Import directory not set." +
                     "\nSelect an import directory from\nFile > set import directory"));
@@ -250,8 +302,8 @@ public class SubmissionController {
     void setUpSourceCodeDisplay() {
         codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        codeArea = new CodeArea();
         codeArea.setEditable(false);
+        codeArea.setFocusTraversable(false);
         codeArea.setMinWidth(1200);
         codeArea.setMinHeight(700);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
@@ -260,6 +312,7 @@ public class SubmissionController {
 
     //displays submission text, grading rubric and saved marks and creates Submission object to hold submission info
     String loadSubmission(TreeItem<File> treeItem, File file) {
+        selectedSubmission = treeItem;
         criteriaList.clear();
         marksList.clear();
 
@@ -292,6 +345,31 @@ public class SubmissionController {
         return submissionText;
     }
 
+    //TODO update treeview when next and previous buttons are pressed
+    @FXML
+    void nextSubmission() {
+        try {
+            TreeItem<File> treeItem = selectedSubmission.getParent().nextSibling().getChildren().get(0);
+            File file = treeItem.getValue();
+            loadSubmission(treeItem, file);
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the end of \n" +
+                    "submissions for this assignment."));
+        }
+    }
+
+    @FXML
+    void previousSubmission() {
+        try{
+            TreeItem<File> treeItem = selectedSubmission.getParent().previousSibling().getChildren().get(0);
+            File file = treeItem.getValue();
+            loadSubmission(treeItem, file);
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the beginning of \n" +
+                    "submissions for this assignment."));
+        }
+    }
+
     void createSubmissionObject(String moduleId, String assignmentId, String studentId) {
         Connection conn = DatabaseController.dbConnect();
         String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND " +
@@ -320,7 +398,7 @@ public class SubmissionController {
     // dynamically add criteria to grading rubric
     public void addCriterion() {
         TextField criterionMarkInput = new TextField();
-        criterionMarkInput.setMaxWidth(30);
+        criterionMarkInput.setMinWidth(40);
         TextField criterionNameInput = new TextField();
         criterionNameInput.setMaxWidth(150);
         Button removeButton = new Button("X");
@@ -384,6 +462,7 @@ public class SubmissionController {
         instructor.setLastUsedRubric(sb.toString());
 
         handleNullMarks();
+        marksVBox.getChildren().get(0).requestFocus();
     }
 
     @FXML
