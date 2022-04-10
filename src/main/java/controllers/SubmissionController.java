@@ -1,5 +1,6 @@
 package controllers;
 
+import com.sun.source.tree.Tree;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -40,6 +41,8 @@ public class SubmissionController {
     private File importDirectory, resultsDirectory;
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
+    private TreeItem<File> selectedSubmission;
+    private TreeCell<File> treeCell;
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
     @FXML private Label username;
@@ -67,23 +70,27 @@ public class SubmissionController {
                         codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
                     }
                 }
+            } else if (keyEvent.getCode().equals(KeyCode.BRACELEFT)) {
+                previousSubmission();
+            } else if (keyEvent.getCode().equals(KeyCode.BRACERIGHT)) {
+                nextSubmission();
             }
         });
 
-        KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_DOWN);
-        KeyCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
         KeyCombination ctrlS = new KeyCodeCombination(KeyCode.S, KeyCodeCombination.CONTROL_DOWN);
         KeyCombination ctrlE = new KeyCodeCombination(KeyCode.E, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
 
         scene.setOnKeyReleased(event -> {
-            if (ctrlA.match(event)) {
-                addCriterion();
-            } else if (ctrlR.match(event)) {
-                modifyGradingRubric();
-            }  else if (ctrlS.match(event)) {
+            if (ctrlS.match(event)) {
                 saveMarks();
             }  else if (ctrlE.match(event)) {
                 export();
+            }  else if (ctrlA.match(event)) {
+                addCriterion();
+            } else if (ctrlR.match(event)) {
+                modifyGradingRubric();
             }
         });
     }
@@ -149,6 +156,7 @@ public class SubmissionController {
                     //display submission text when filename is clicked
                     TreeItem<File> treeItem = cell.getTreeItem();
                     File file = treeItem.getValue();
+                    treeCell = cell;
                     if (treeItem.isLeaf()) {
                         codeArea.clear();
                         codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
@@ -294,8 +302,8 @@ public class SubmissionController {
     void setUpSourceCodeDisplay() {
         codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        codeArea = new CodeArea();
         codeArea.setEditable(false);
+        codeArea.setFocusTraversable(false);
         codeArea.setMinWidth(1200);
         codeArea.setMinHeight(700);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
@@ -304,6 +312,7 @@ public class SubmissionController {
 
     //displays submission text, grading rubric and saved marks and creates Submission object to hold submission info
     String loadSubmission(TreeItem<File> treeItem, File file) {
+        selectedSubmission = treeItem;
         criteriaList.clear();
         marksList.clear();
 
@@ -334,6 +343,31 @@ public class SubmissionController {
         loadComments();
 
         return submissionText;
+    }
+
+    //TODO update treeview when next and previous buttons are pressed
+    @FXML
+    void nextSubmission() {
+        try {
+            TreeItem<File> treeItem = selectedSubmission.getParent().nextSibling().getChildren().get(0);
+            File file = treeItem.getValue();
+            loadSubmission(treeItem, file);
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the end of \n" +
+                    "submissions for this assignment."));
+        }
+    }
+
+    @FXML
+    void previousSubmission() {
+        try{
+            TreeItem<File> treeItem = selectedSubmission.getParent().previousSibling().getChildren().get(0);
+            File file = treeItem.getValue();
+            loadSubmission(treeItem, file);
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the beginning of \n" +
+                    "submissions for this assignment."));
+        }
     }
 
     void createSubmissionObject(String moduleId, String assignmentId, String studentId) {
@@ -428,6 +462,7 @@ public class SubmissionController {
         instructor.setLastUsedRubric(sb.toString());
 
         handleNullMarks();
+        marksVBox.getChildren().get(0).requestFocus();
     }
 
     @FXML
