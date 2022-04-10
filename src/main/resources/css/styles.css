@@ -14,6 +14,10 @@
     -fx-text-fill: #283747;
 }
 
+.button:focused {
+    -fx-background-color: linear-gradient(#85B1E4, #769fcd);
+}
+
 .section-heading {
     -fx-font-weight: bold;
 }
@@ -41,6 +45,7 @@
     -fx-text-fill: #FFFFFF;
     -fx-font-weight: bold, italic;
 }
+
 
 /*colour palette*/
 /*#f7fbfc*/

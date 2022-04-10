@@ -39,8 +39,13 @@ public class InstructorController {
             // prepare source code display area
             submissionViewController.setUpSourceCodeDisplay();
 
+            // set key listener
+            submissionViewController.initializeListeners();
+
             // import files
             submissionViewController.displayFileTree(submissionViewController.treeView);
+
+
 
         } catch (SQLException e) {
             e.printStackTrace();

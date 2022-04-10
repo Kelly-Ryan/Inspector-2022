@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubmissionController">
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1280.0" spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubmissionController">
    <VBox>
       <VBox prefHeight="400.0" prefWidth="243.0" stylesheets="@../css/styles.css">
          <Label id="username" fx:id="username" styleClass="section-heading">
@@ -124,10 +124,8 @@
             <TextField fx:id="assignmentCodeTextField" alignment="CENTER_RIGHT" minWidth="0.0" prefWidth="110.0" />
          </HBox>
          <HBox alignment="CENTER_RIGHT" spacing="20.0">
-            <children>
-               <Button mnemonicParsing="false" onAction="#export" text="Export" />
-               <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#setExportDirectory" text="Set Export Directory" />
-            </children>
+            <Button mnemonicParsing="false" onAction="#export" text="Export" />
+            <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#setExportDirectory" text="Set Export Directory" />
          </HBox>
       </VBox>
    </VBox>

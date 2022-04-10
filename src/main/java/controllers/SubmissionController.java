@@ -1,11 +1,17 @@
 package controllers;
 
-import com.sun.source.tree.Tree;
 import javafx.css.PseudoClass;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -46,6 +52,41 @@ public class SubmissionController {
     @FXML private TextArea commentsTextArea;
     @FXML private TextField moduleCodeTextField;
     @FXML private TextField assignmentCodeTextField;
+
+    void initializeListeners() {
+        Scene scene = treeView.getScene();
+
+        //display submission text when "Enter" is pressed on filename
+        treeView.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                TreeItem<File> treeItem = treeView.getSelectionModel().getSelectedItem();
+                if (treeItem != null && keyEvent.getCode().equals(KeyCode.ENTER)) {
+                    File file = treeItem.getValue();
+                    if (treeItem.isLeaf()) {
+                        codeArea.clear();
+                        codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
+                    }
+                }
+            }
+        });
+
+        KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlS = new KeyCodeCombination(KeyCode.S, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlE = new KeyCodeCombination(KeyCode.E, KeyCodeCombination.CONTROL_DOWN);
+
+        scene.setOnKeyReleased(event -> {
+            if (ctrlA.match(event)) {
+                addCriterion();
+            } else if (ctrlR.match(event)) {
+                modifyGradingRubric();
+            }  else if (ctrlS.match(event)) {
+                saveMarks();
+            }  else if (ctrlE.match(event)) {
+                export();
+            }
+        });
+    }
 
     void setInstructor(InstructorModel instructor) {
         this.instructor = instructor;
@@ -133,6 +174,9 @@ public class SubmissionController {
             for (File file : fileList) {
                 createFileTree(file, rootItem);
             }
+
+            treeView.requestFocus();
+
         } catch (RuntimeException e) {
             alertController.displayAlert(new AlertModel("Import Directory", "Import directory not set." +
                     "\nSelect an import directory from\nFile > set import directory"));
@@ -320,7 +364,7 @@ public class SubmissionController {
     // dynamically add criteria to grading rubric
     public void addCriterion() {
         TextField criterionMarkInput = new TextField();
-        criterionMarkInput.setMaxWidth(30);
+        criterionMarkInput.setMinWidth(40);
         TextField criterionNameInput = new TextField();
         criterionNameInput.setMaxWidth(150);
         Button removeButton = new Button("X");
