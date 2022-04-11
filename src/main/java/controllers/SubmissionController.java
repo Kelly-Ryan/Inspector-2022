@@ -70,10 +70,14 @@ public class SubmissionController {
                         codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
                     }
                 }
-            } else if (keyEvent.getCode().equals(KeyCode.BRACELEFT)) {
+            } else if (keyEvent.getCode().equals(KeyCode.W)) {
                 previousSubmission();
-            } else if (keyEvent.getCode().equals(KeyCode.BRACERIGHT)) {
+            } else if (keyEvent.getCode().equals(KeyCode.S)) {
                 nextSubmission();
+            } else if (keyEvent.getCode().equals(KeyCode.D)) {
+                nextFile();
+            } else if (keyEvent.getCode().equals(KeyCode.A)) {
+                previousFile();
             }
         });
 
@@ -367,6 +371,32 @@ public class SubmissionController {
         } catch (NullPointerException e) {
             alertController.displayAlert(new AlertModel("Alert", "You have reached the beginning of \n" +
                     "submissions for this assignment."));
+        }
+    }
+
+    @FXML
+    void nextFile() {
+        try{
+            TreeItem<File> treeItem = selectedSubmission.nextSibling();
+            File file = treeItem.getValue();
+            codeArea.clear();
+            codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the last \n" +
+                    "file for this submission."));
+        }
+    }
+
+    @FXML
+    void previousFile() {
+        try{
+            TreeItem<File> treeItem = selectedSubmission.previousSibling();
+            File file = treeItem.getValue();
+            codeArea.clear();
+            codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the first \n" +
+                    "file for this submission."));
         }
     }
 
