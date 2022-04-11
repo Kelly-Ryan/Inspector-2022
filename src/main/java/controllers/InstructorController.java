@@ -53,6 +53,11 @@ public class InstructorController {
     }
 
     @FXML
+    void setExportDirectory() {
+        submissionViewController.setExportDirectory();
+    }
+
+    @FXML
     void setImportDirectory() {
         submissionViewController.setImportDirectory();
     }

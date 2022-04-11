@@ -428,7 +428,7 @@ public class SubmissionController {
     // dynamically add criteria to grading rubric
     public void addCriterion() {
         TextField criterionMarkInput = new TextField();
-        criterionMarkInput.setMinWidth(40);
+        criterionMarkInput.setMinWidth(35);
         TextField criterionNameInput = new TextField();
         criterionNameInput.setMaxWidth(150);
         Button removeButton = new Button("X");
@@ -470,7 +470,7 @@ public class SubmissionController {
 
             //populate marking section with rubric info
             TextField markTextField = new TextField();
-            markTextField.setMaxWidth(30);
+            markTextField.setMinWidth(35);
 
             //dynamically update marks total as marks are added
             markTextField.setOnMouseExited((e -> updateTotalMarks()));
@@ -511,7 +511,7 @@ public class SubmissionController {
         String[] rubric = rubricString.split(",");
         for (int i = 0; i <= rubric.length - 2; i += 2) {
             TextField criterionMarkInput = new TextField();
-            criterionMarkInput.setMaxWidth(30);
+            criterionMarkInput.setMaxWidth(35);
             criterionMarkInput.setText(rubric[i]);
             TextField criterionNameInput = new TextField();
             criterionNameInput.setMaxWidth(150);
@@ -586,7 +586,7 @@ public class SubmissionController {
 
             for (int i = 0; i <= marks.length - 2; i += 2) {
                 TextField markTextField = new TextField();
-                markTextField.setMaxWidth(30);
+                markTextField.setMaxWidth(35);
                 markTextField.setText(marks[i]);
                 markTextField.setOnMouseExited(e -> updateTotalMarks());
 

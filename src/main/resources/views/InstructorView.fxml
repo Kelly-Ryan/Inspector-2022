@@ -10,6 +10,7 @@
     <MenuBar>
         <Menu mnemonicParsing="false" text="_File">
          <MenuItem id="setImportDirMenuItem" mnemonicParsing="false" onAction="#setImportDirectory" text="set import directory..." />
+         <MenuItem mnemonicParsing="false" onAction="#setExportDirectory" text="set results export directory..." />
          <SeparatorMenuItem mnemonicParsing="false" />
          <MenuItem id="closeMenuItem" mnemonicParsing="false" onAction="#exitApplication" text="Close" />
         </Menu>
