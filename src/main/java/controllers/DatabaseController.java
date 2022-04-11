@@ -12,6 +12,7 @@ public class DatabaseController {
             Class.forName("org.sqlite.JDBC");
             //create database if it does not already exist and connect to it
             conn = DriverManager.getConnection("jdbc:sqlite:src/main/resources/db/inspector.db");
+            //conn = DriverManager.getConnection("jdbc:sqlite:src/main/resources/db/inspector.db");
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);

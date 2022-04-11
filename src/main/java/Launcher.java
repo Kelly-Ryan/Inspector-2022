@@ -11,7 +11,7 @@ import java.util.Objects;
 
 import controllers.DatabaseController;
 
-public class Main extends Application {
+public class Launcher extends Application {
 
     public static void main(String[] args) {
         //launch calls start() from Application class
