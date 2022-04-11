@@ -6,10 +6,11 @@
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InstructorController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InstructorController">
     <MenuBar>
         <Menu mnemonicParsing="false" text="_File">
          <MenuItem id="setImportDirMenuItem" mnemonicParsing="false" onAction="#setImportDirectory" text="set import directory..." />
+         <MenuItem mnemonicParsing="false" onAction="#setExportDirectory" text="set results export directory..." />
          <SeparatorMenuItem mnemonicParsing="false" />
          <MenuItem id="closeMenuItem" mnemonicParsing="false" onAction="#exitApplication" text="Close" />
         </Menu>

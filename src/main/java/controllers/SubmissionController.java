@@ -1,9 +1,6 @@
 package controllers;
 
-import com.sun.source.tree.Tree;
 import javafx.css.PseudoClass;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -12,7 +9,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -70,10 +66,14 @@ public class SubmissionController {
                         codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
                     }
                 }
-            } else if (keyEvent.getCode().equals(KeyCode.BRACELEFT)) {
+            } else if (keyEvent.getCode().equals(KeyCode.W)) {
                 previousSubmission();
-            } else if (keyEvent.getCode().equals(KeyCode.BRACERIGHT)) {
+            } else if (keyEvent.getCode().equals(KeyCode.S)) {
                 nextSubmission();
+            } else if (keyEvent.getCode().equals(KeyCode.D)) {
+                nextFile();
+            } else if (keyEvent.getCode().equals(KeyCode.A)) {
+                previousFile();
             }
         });
 
@@ -370,6 +370,32 @@ public class SubmissionController {
         }
     }
 
+    @FXML
+    void nextFile() {
+        try{
+            TreeItem<File> treeItem = selectedSubmission.nextSibling();
+            File file = treeItem.getValue();
+            codeArea.clear();
+            codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the last \n" +
+                    "file for this submission."));
+        }
+    }
+
+    @FXML
+    void previousFile() {
+        try{
+            TreeItem<File> treeItem = selectedSubmission.previousSibling();
+            File file = treeItem.getValue();
+            codeArea.clear();
+            codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
+        } catch (NullPointerException e) {
+            alertController.displayAlert(new AlertModel("Alert", "You have reached the first \n" +
+                    "file for this submission."));
+        }
+    }
+
     void createSubmissionObject(String moduleId, String assignmentId, String studentId) {
         Connection conn = DatabaseController.dbConnect();
         String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND " +
@@ -398,7 +424,7 @@ public class SubmissionController {
     // dynamically add criteria to grading rubric
     public void addCriterion() {
         TextField criterionMarkInput = new TextField();
-        criterionMarkInput.setMinWidth(40);
+        criterionMarkInput.setMinWidth(35);
         TextField criterionNameInput = new TextField();
         criterionNameInput.setMaxWidth(150);
         Button removeButton = new Button("X");
@@ -440,7 +466,7 @@ public class SubmissionController {
 
             //populate marking section with rubric info
             TextField markTextField = new TextField();
-            markTextField.setMaxWidth(30);
+            markTextField.setMinWidth(35);
 
             //dynamically update marks total as marks are added
             markTextField.setOnMouseExited((e -> updateTotalMarks()));
@@ -481,7 +507,7 @@ public class SubmissionController {
         String[] rubric = rubricString.split(",");
         for (int i = 0; i <= rubric.length - 2; i += 2) {
             TextField criterionMarkInput = new TextField();
-            criterionMarkInput.setMaxWidth(30);
+            criterionMarkInput.setMaxWidth(35);
             criterionMarkInput.setText(rubric[i]);
             TextField criterionNameInput = new TextField();
             criterionNameInput.setMaxWidth(150);
@@ -556,7 +582,7 @@ public class SubmissionController {
 
             for (int i = 0; i <= marks.length - 2; i += 2) {
                 TextField markTextField = new TextField();
-                markTextField.setMaxWidth(30);
+                markTextField.setMaxWidth(35);
                 markTextField.setText(marks[i]);
                 markTextField.setOnMouseExited(e -> updateTotalMarks());
 
