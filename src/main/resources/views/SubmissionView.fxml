@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
@@ -46,18 +45,6 @@
    </VBox>
    <VBox alignment="TOP_CENTER" minWidth="700.0" prefHeight="741.0" prefWidth="918.0">
       <ScrollPane fx:id="sourceCodeScrollPane" focusTraversable="false" hbarPolicy="ALWAYS" minWidth="600.0" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
-      <ButtonBar focusTraversable="false" maxHeight="37.6" maxWidth="200.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="27.0" prefWidth="182.0">
-         <buttons>
-            <Button alignment="CENTER" contentDisplay="CENTER" ellipsisString="" mnemonicParsing="false" onAction="#nextSubmission" text="Next" textAlignment="CENTER" />
-            <Button layoutX="852.0" layoutY="16.0" mnemonicParsing="false" onAction="#previousSubmission" text="Previous" textAlignment="CENTER" />
-         </buttons>
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-         <padding>
-            <Insets right="20.0" top="10.0" />
-         </padding>
-      </ButtonBar>
    </VBox>
    <VBox alignment="TOP_CENTER" minWidth="250.0">
       <HBox alignment="CENTER" prefWidth="200.0">

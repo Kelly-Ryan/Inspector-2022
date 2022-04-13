@@ -1,17 +1,14 @@
 package controllers;
 
-import com.sun.javafx.scene.control.behavior.TextAreaBehavior;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.skin.TextAreaSkin;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -40,8 +37,6 @@ public class SubmissionController {
     private File importDirectory, resultsDirectory;
     private SubmissionModel currentSubmission;
     private CodeArea codeArea;
-    private TreeItem<File> selectedSubmission;
-    private TreeCell<File> treeCell;
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
     @FXML private Label username;
@@ -52,34 +47,11 @@ public class SubmissionController {
     @FXML private Label maxMarksLabel;
     @FXML private Label marksReceivedLabel;
     @FXML private TextArea commentsTextArea;
-    @FXML private Button saveButton;
     @FXML private TextField moduleCodeTextField;
     @FXML private TextField assignmentCodeTextField;
 
     void initializeListeners() {
         Scene scene = treeView.getScene();
-
-        //display submission text when "Enter" is pressed on filename
-        treeView.setOnKeyPressed(keyEvent -> {
-            if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-                TreeItem<File> treeItem = treeView.getSelectionModel().getSelectedItem();
-                if (treeItem != null && keyEvent.getCode().equals(KeyCode.ENTER)) {
-                    File file = treeItem.getValue();
-                    if (treeItem.isLeaf()) {
-                        codeArea.clear();
-                        codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
-                    }
-                }
-            } else if (keyEvent.getCode().equals(KeyCode.W)) {
-                previousSubmission();
-            } else if (keyEvent.getCode().equals(KeyCode.S)) {
-                nextSubmission();
-            } else if (keyEvent.getCode().equals(KeyCode.D)) {
-                nextFile();
-            } else if (keyEvent.getCode().equals(KeyCode.A)) {
-                previousFile();
-            }
-        });
 
         KeyCombination ctrlS = new KeyCodeCombination(KeyCode.S, KeyCodeCombination.CONTROL_DOWN);
         KeyCombination ctrlE = new KeyCodeCombination(KeyCode.E, KeyCodeCombination.CONTROL_DOWN);
@@ -95,6 +67,18 @@ public class SubmissionController {
                 addCriterion();
             } else if (ctrlR.match(event)) {
                 modifyGradingRubric();
+            }
+        });
+
+        //display submission text when source code files are selected with arrow keys
+        treeView.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.UP) || keyEvent.getCode().equals(KeyCode.DOWN)) {
+                TreeItem<File> treeItem = treeView.getSelectionModel().getSelectedItem();
+                if (treeItem != null) {
+                    if (treeItem.isLeaf()) {
+                        codeArea.replaceText(0, 0, loadSubmission(treeItem));
+                    }
+                }
             }
         });
     }
@@ -155,15 +139,12 @@ public class SubmissionController {
                 }
             };
 
+            //display submission text when filename is clicked
             cell.setOnMouseClicked(event -> {
                 if (!cell.isEmpty()) {
-                    //display submission text when filename is clicked
                     TreeItem<File> treeItem = cell.getTreeItem();
-                    File file = treeItem.getValue();
-                    treeCell = cell;
                     if (treeItem.isLeaf()) {
-                        codeArea.clear();
-                        codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
+                        codeArea.replaceText(0, 0, loadSubmission(treeItem));
                     }
                 }
             });
@@ -315,10 +296,12 @@ public class SubmissionController {
     }
 
     //displays submission text, grading rubric and saved marks and creates Submission object to hold submission info
-    String loadSubmission(TreeItem<File> treeItem, File file) {
-        selectedSubmission = treeItem;
+    String loadSubmission(TreeItem<File> treeItem) {
+        codeArea.clear();
         criteriaList.clear();
         marksList.clear();
+
+        File file = treeItem.getValue();
 
         String studentIdDir = treeItem.getParent().getValue().toString();
         String assignmentDir = treeItem.getParent().getParent().getValue().toString();
@@ -349,57 +332,6 @@ public class SubmissionController {
         return submissionText;
     }
 
-    //TODO update treeview when next and previous buttons are pressed
-    @FXML
-    void nextSubmission() {
-        try {
-            TreeItem<File> treeItem = selectedSubmission.getParent().nextSibling().getChildren().get(0);
-            File file = treeItem.getValue();
-            loadSubmission(treeItem, file);
-        } catch (NullPointerException e) {
-            alertController.displayAlert(new AlertModel("Alert", "You have reached the end of \n" +
-                    "submissions for this assignment."));
-        }
-    }
-
-    @FXML
-    void previousSubmission() {
-        try{
-            TreeItem<File> treeItem = selectedSubmission.getParent().previousSibling().getChildren().get(0);
-            File file = treeItem.getValue();
-            loadSubmission(treeItem, file);
-        } catch (NullPointerException e) {
-            alertController.displayAlert(new AlertModel("Alert", "You have reached the beginning of \n" +
-                    "submissions for this assignment."));
-        }
-    }
-
-    @FXML
-    void nextFile() {
-        try{
-            TreeItem<File> treeItem = selectedSubmission.nextSibling();
-            File file = treeItem.getValue();
-            codeArea.clear();
-            codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
-        } catch (NullPointerException e) {
-            alertController.displayAlert(new AlertModel("Alert", "You have reached the last \n" +
-                    "file for this submission."));
-        }
-    }
-
-    @FXML
-    void previousFile() {
-        try{
-            TreeItem<File> treeItem = selectedSubmission.previousSibling();
-            File file = treeItem.getValue();
-            codeArea.clear();
-            codeArea.replaceText(0, 0, loadSubmission(treeItem, file));
-        } catch (NullPointerException e) {
-            alertController.displayAlert(new AlertModel("Alert", "You have reached the first \n" +
-                    "file for this submission."));
-        }
-    }
-
     void createSubmissionObject(String moduleId, String assignmentId, String studentId) {
         Connection conn = DatabaseController.dbConnect();
         String getSubmission = "SELECT * FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND " +
@@ -428,7 +360,7 @@ public class SubmissionController {
     // dynamically add criteria to grading rubric
     public void addCriterion() {
         TextField criterionMarkInput = new TextField();
-        criterionMarkInput.setMinWidth(35);
+        criterionMarkInput.setMaxWidth(35);
         TextField criterionNameInput = new TextField();
         criterionNameInput.setMaxWidth(150);
         Button removeButton = new Button("X");
@@ -438,6 +370,8 @@ public class SubmissionController {
 
         rubricVBox.getChildren().add(hBox);
         criteriaList.add(hBox);
+
+        hBox.getChildren().get(0).requestFocus();
     }
 
     public void removeCriterion(HBox hBox) {
@@ -470,7 +404,7 @@ public class SubmissionController {
 
             //populate marking section with rubric info
             TextField markTextField = new TextField();
-            markTextField.setMinWidth(35);
+            markTextField.setMaxWidth(35);
 
             //dynamically update marks total as marks are added
             markTextField.setOnMouseExited((e -> updateTotalMarks()));
@@ -492,6 +426,7 @@ public class SubmissionController {
         instructor.setLastUsedRubric(sb.toString());
 
         handleNullMarks();
+
         marksVBox.getChildren().get(0).requestFocus();
     }
 
@@ -634,6 +569,11 @@ public class SubmissionController {
             conn.close();
 
             alertController.displayAlert(new AlertModel("Data Saved", "Results successfully saved."));
+
+            // reset focus and selection after save
+            treeView.requestFocus();
+            treeView.getSelectionModel().selectNext();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
