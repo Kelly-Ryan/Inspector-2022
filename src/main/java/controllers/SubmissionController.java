@@ -95,7 +95,7 @@ public class SubmissionController {
     }
 
     @FXML
-    void setImportDirectory() {
+    void setImportDirectory() throws IOException {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         File directory = directoryChooser.showDialog(new Stage());
         if (directory != null) {
@@ -115,7 +115,7 @@ public class SubmissionController {
         displayFileTree(treeView);
     }
 
-    void displayFileTree(TreeView<File> treeView) {
+    void displayFileTree(TreeView<File> treeView) throws IOException {
         //create root item
         TreeItem<File> rootItem = new TreeItem<>(importDirectory);
         //hide root item of treeView
@@ -153,8 +153,14 @@ public class SubmissionController {
             cell.treeItemProperty().addListener((obs, oldTreeItem, newTreeItem) -> cell.pseudoClassStateChanged(parentElementPseudoClass,
                     newTreeItem != null && newTreeItem.getParent() == cell.getTreeView().getRoot()));
 
-            cell.treeItemProperty().addListener((obs, oldTreeItem, newTreeItem) -> cell.pseudoClassStateChanged(gradedElementPseudoClass,
-                    newTreeItem != null && checkSubmissionGraded(newTreeItem)));
+            cell.treeItemProperty().addListener((obs, oldTreeItem, newTreeItem) -> {
+                try {
+                    cell.pseudoClassStateChanged(gradedElementPseudoClass,
+                            newTreeItem != null && checkSubmissionGraded(newTreeItem));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            });
 
             return cell;
         });
@@ -176,7 +182,7 @@ public class SubmissionController {
         }
     }
 
-    void createFileTree(File file, TreeItem<File> parent) {
+    void createFileTree(File file, TreeItem<File> parent) throws IOException {
         //create a new tree item with the file name and add it to parent
         TreeItem<File> fileItem = new TreeItem<>(new File(file.getName()));
         parent.getChildren().add(fileItem);
@@ -191,30 +197,26 @@ public class SubmissionController {
         }
     }
 
-    void readFile(File file) {
+    void readFile(File file) throws IOException {
         //split directories in filepath - "\" for Windows and "/" for Unix/Mac
         String[] splitFilepath = file.toString().split("[\\\\/]");
         String module = splitFilepath[splitFilepath.length - 4];
         String assignment = splitFilepath[splitFilepath.length - 3];
         String studentID = splitFilepath[splitFilepath.length - 2];
         String filename = splitFilepath[splitFilepath.length - 1];
-        String submissionText = "";
+        String submissionText;
 
         //read file text
         StringBuilder sb = new StringBuilder();
-        try {
-            FileReader fr = new FileReader(file);
-            BufferedReader br = new BufferedReader(fr);
-            String line = br.readLine();
+        FileReader fr = new FileReader(file);
+        BufferedReader br = new BufferedReader(fr);
+        String line = br.readLine();
 
-            while (line != null) {
-                sb.append(line).append("\n");
-                line = br.readLine();
-            }
-            submissionText = sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
+        while (line != null) {
+            sb.append(line).append("\n");
+            line = br.readLine();
         }
+        submissionText = sb.toString();
 
         Connection conn = DatabaseController.dbConnect();
         String importSubmissions = "INSERT OR IGNORE INTO ASSIGNMENT_SUBMISSION (instructorId, moduleId, assignmentId, " +
@@ -246,7 +248,7 @@ public class SubmissionController {
         }
     }
 
-    boolean checkSubmissionGraded(TreeItem<File> treeItem) {
+    boolean checkSubmissionGraded(TreeItem<File> treeItem) throws SQLException {
         // for studentId folders containing source code files
         boolean graded = false;
 
@@ -257,26 +259,22 @@ public class SubmissionController {
                 String module = treeItem.getParent().getParent().getValue().toString();
 
                 Connection conn = DatabaseController.dbConnect();
-                String marksReceived = "";
+                String marksReceived;
                 String sql = "SELECT marksReceived FROM ASSIGNMENT_SUBMISSION WHERE instructorId = ? AND moduleId = ? AND " +
                         "assignmentId = ? AND studentId = ?";
-                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    pstmt.setString(1, instructor.getInstructorId());
-                    pstmt.setString(2, module);
-                    pstmt.setString(3, assignment);
-                    pstmt.setString(4, studentId);
-                    ResultSet rs = pstmt.executeQuery();
-                    marksReceived = rs.getString(1);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, instructor.getInstructorId());
+                pstmt.setString(2, module);
+                pstmt.setString(3, assignment);
+                pstmt.setString(4, studentId);
+                ResultSet rs = pstmt.executeQuery();
+                marksReceived = rs.getString(1);
+                conn.close();
 
                 if(!marksReceived.equals("marks not set")) {
                     graded = true;
                 }
             }
-
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             return graded;
         }

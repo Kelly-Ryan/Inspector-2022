@@ -19,44 +19,38 @@ public class InstructorController {
     @FXML private Parent submissionView;
     @FXML SubmissionController submissionViewController;
 
-    void setup(InstructorController instructorController, String email){
+    void setup(InstructorController instructorController, String email) throws IOException, SQLException {
         this.instructorController = instructorController;
 
         //sql query to initialize InstructorModel object
         Connection conn = DatabaseController.dbConnect();
         String sql = "SELECT instructorId, name, importDirectory, resultsDirectory, lastUsedRubric FROM INSTRUCTOR WHERE email = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
-            int instructorId = Integer.parseInt(rs.getString(1));
-            String name = rs.getString(2);
-            String importDirectory = rs.getString(3);
-            String resultsDirectory = rs.getString(4);
-            String lastUsedRubric = rs.getString(5);
-            conn.close();
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, email);
+        ResultSet rs = pstmt.executeQuery();
+        int instructorId = Integer.parseInt(rs.getString(1));
+        String name = rs.getString(2);
+        String importDirectory = rs.getString(3);
+        String resultsDirectory = rs.getString(4);
+        String lastUsedRubric = rs.getString(5);
+        conn.close();
 
-            // set instructor info
-            instructor = new InstructorModel(instructorId, name, email, importDirectory, resultsDirectory, lastUsedRubric);
-            submissionViewController.setInstructor(instructor);
+        // set instructor info
+        instructor = new InstructorModel(instructorId, name, email, importDirectory, resultsDirectory, lastUsedRubric);
+        submissionViewController.setInstructor(instructor);
 
-            // prepare source code display area
-            submissionViewController.setUpSourceCodeDisplay();
+        // prepare source code display area
+        submissionViewController.setUpSourceCodeDisplay();
 
-            // set key listener
-            submissionViewController.initializeListeners();
+        // set key listener
+        submissionViewController.initializeListeners();
 
-            // import files
-            submissionViewController.displayFileTree(submissionViewController.treeView);
-
-
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // import files
+        submissionViewController.displayFileTree(submissionViewController.treeView);
     }
 
     @FXML
-    void setImportDirectory() {
+    void setImportDirectory() throws IOException {
         submissionViewController.setImportDirectory();
     }
 
