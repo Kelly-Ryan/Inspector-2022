@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
@@ -12,23 +11,36 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="750.0" prefWidth="1920.0" spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubmissionController">
+<HBox alignment="TOP_CENTER" nodeOrientation="LEFT_TO_RIGHT" spacing="20.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.SubmissionController">
    <VBox alignment="TOP_CENTER" minWidth="250.0">
-      <VBox prefHeight="400.0" prefWidth="243.0" stylesheets="@../css/styles.css">
-         <Label id="username" fx:id="username" focusTraversable="false" styleClass="section-heading">
+      <VBox alignment="CENTER_LEFT" prefHeight="400.0" prefWidth="243.0" stylesheets="@../css/styles.css">
+         <Label id="username" fx:id="username" focusTraversable="false" textAlignment="JUSTIFY">
             <VBox.margin>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </VBox.margin>
          </Label>
-         <TreeView id="treeView" fx:id="treeView" minHeight="350.0" prefWidth="200.0" />
-         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <HBox alignment="CENTER">
+            <children>
+               <Label styleClass="section-heading" text="Assignments">
+                  <HBox.margin>
+                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  </HBox.margin>
+               </Label>
+            </children>
+         </HBox>
+         <TreeView id="treeView" fx:id="treeView" minHeight="350.0" prefWidth="200.0">
+            <VBox.margin>
+               <Insets bottom="20.0" />
+            </VBox.margin></TreeView>
+         <Separator prefWidth="200.0" />
+         <HBox alignment="CENTER" prefHeight="50.0" prefWidth="200.0">
             <Label styleClass="section-heading" text="Grading Rubric" textAlignment="CENTER">
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
             </Label>
          </HBox>
-         <ScrollPane fitToWidth="true" minViewportHeight="250.0">
+         <ScrollPane fitToWidth="true" minHeight="200.0">
             <VBox fx:id="rubricVBox" alignment="TOP_CENTER" focusTraversable="true" spacing="10.0">
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -46,34 +58,23 @@
    </VBox>
    <VBox alignment="TOP_CENTER" minWidth="700.0" prefHeight="741.0" prefWidth="918.0">
       <ScrollPane fx:id="sourceCodeScrollPane" focusTraversable="false" hbarPolicy="ALWAYS" minWidth="600.0" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
-      <ButtonBar focusTraversable="false" maxHeight="37.6" maxWidth="200.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="27.0" prefWidth="182.0">
-         <buttons>
-            <Button alignment="CENTER" contentDisplay="CENTER" ellipsisString="" mnemonicParsing="false" onAction="#nextSubmission" text="Next" textAlignment="CENTER" />
-            <Button layoutX="852.0" layoutY="16.0" mnemonicParsing="false" onAction="#previousSubmission" text="Previous" textAlignment="CENTER" />
-         </buttons>
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-         <padding>
-            <Insets right="20.0" top="10.0" />
-         </padding>
-      </ButtonBar>
    </VBox>
-   <VBox alignment="TOP_CENTER" minWidth="250.0">
+   <VBox alignment="TOP_CENTER" maxHeight="730.0" minWidth="250.0">
       <HBox alignment="CENTER" prefWidth="200.0">
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
          <VBox.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </VBox.margin>
          <Label focusTraversable="false" styleClass="section-heading" text="Marks" textAlignment="CENTER" />
       </HBox>
-      <VBox fx:id="marksVBox" alignment="CENTER_LEFT" spacing="10.0">
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-      </VBox>
+      <ScrollPane maxHeight="200.0" maxWidth="230.0" minHeight="200.0">
+         <content>
+            <VBox fx:id="marksVBox" alignment="CENTER_LEFT" spacing="10.0">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </VBox>
+         </content>
+      </ScrollPane>
       <VBox>
          <HBox alignment="CENTER_LEFT" prefHeight="43.0" prefWidth="262.0" spacing="10.0">
             <padding>
@@ -93,39 +94,43 @@
          <VBox.margin>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </VBox.margin>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
          <Label focusTraversable="false" styleClass="section-heading" text="Feedback" />
-         <TextArea id="commentsTextArea" fx:id="commentsTextArea" prefHeight="400.0" prefWidth="200.0" wrapText="true" />
+         <TextArea id="commentsTextArea" fx:id="commentsTextArea" minHeight="100.0" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
          <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveMarks" text="Save" />
       </VBox>
       <Separator prefWidth="200.0" />
-      <VBox alignment="CENTER">
+      <VBox alignment="CENTER" maxWidth="240.0">
          <VBox.margin>
             <Insets />
          </VBox.margin>
-         <padding>
-            <Insets bottom="10.0" right="10.0" top="10.0" />
-         </padding>
-         <Label focusTraversable="false" styleClass="section-heading" text="Export to CSV" />
-         <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="266.0" spacing="10.0">
-            <padding>
+         <HBox alignment="CENTER">
+            <children>
+               <Label focusTraversable="false" styleClass="section-heading" text="Export to CSV" />
+            </children>
+            <VBox.margin>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-            </padding>
+            </VBox.margin>
+         </HBox>
+         <HBox alignment="CENTER_RIGHT" prefHeight="50.0" prefWidth="266.0" spacing="10.0">
             <Label focusTraversable="false" text="Module:" />
             <TextField fx:id="moduleCodeTextField" alignment="CENTER_RIGHT" minWidth="0.0" prefWidth="110.0" />
+            <padding>
+               <Insets bottom="10.0" left="10.0" right="10.0" />
+            </padding>
          </HBox>
-         <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+         <HBox alignment="CENTER_RIGHT" prefHeight="50.0" prefWidth="200.0" spacing="10.0">
+            <Label focusTraversable="false" text="Assignment:" />
+            <TextField fx:id="assignmentCodeTextField" alignment="CENTER_RIGHT" minWidth="0.0" prefWidth="110.0" />
             <padding>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding>
-            <Label focusTraversable="false" text="Assignment:" />
-            <TextField fx:id="assignmentCodeTextField" alignment="CENTER_RIGHT" minWidth="0.0" prefWidth="110.0" />
          </HBox>
          <HBox alignment="CENTER_RIGHT" spacing="20.0">
             <Button mnemonicParsing="false" onAction="#export" text="Export" />
             <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#setExportDirectory" text="Set Export Directory" />
+            <padding>
+               <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
          </HBox>
       </VBox>
    </VBox>
