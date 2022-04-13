@@ -1,14 +1,17 @@
 package controllers;
 
+import com.sun.javafx.scene.control.behavior.TextAreaBehavior;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.skin.TextAreaSkin;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -49,6 +52,7 @@ public class SubmissionController {
     @FXML private Label maxMarksLabel;
     @FXML private Label marksReceivedLabel;
     @FXML private TextArea commentsTextArea;
+    @FXML private Button saveButton;
     @FXML private TextField moduleCodeTextField;
     @FXML private TextField assignmentCodeTextField;
 

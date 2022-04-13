@@ -4,18 +4,39 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InstructorController">
     <MenuBar>
-        <Menu mnemonicParsing="false" text="_File">
-         <MenuItem id="setImportDirMenuItem" mnemonicParsing="false" onAction="#setImportDirectory" text="set import directory..." />
-         <MenuItem mnemonicParsing="false" onAction="#setExportDirectory" text="set results export directory..." />
+        <Menu text="_File">
+         <MenuItem id="setImportDirMenuItem" onAction="#setImportDirectory" text="set _import directory...">
+            <accelerator>
+               <KeyCodeCombination alt="DOWN" code="I" control="UP" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator></MenuItem>
+         <MenuItem onAction="#setExportDirectory" text="set _results export directory...">
+            <accelerator>
+               <KeyCodeCombination alt="DOWN" code="R" control="UP" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator></MenuItem>
          <SeparatorMenuItem mnemonicParsing="false" />
-         <MenuItem id="closeMenuItem" mnemonicParsing="false" onAction="#exitApplication" text="Close" />
+         <MenuItem id="closeMenuItem" onAction="#exitApplication" text="_Close">
+            <accelerator>
+               <KeyCodeCombination alt="DOWN" code="C" control="UP" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator></MenuItem>
+         <accelerator>
+            <KeyCodeCombination alt="DOWN" code="F" control="UP" meta="UP" shift="UP" shortcut="UP" />
+         </accelerator>
         </Menu>
         <Menu mnemonicParsing="false" text="_Help">
-            <MenuItem mnemonicParsing="false" text="About" />
+         <MenuItem onAction="#openHelpDoc" text="_User Manual">
+            <accelerator>
+               <KeyCodeCombination alt="DOWN" code="U" control="UP" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator>
+         </MenuItem>
+            <MenuItem text="_About">
+            <accelerator>
+               <KeyCodeCombination alt="ANY" code="A" control="UP" meta="UP" shift="UP" shortcut="UP" />
+            </accelerator></MenuItem>
         </Menu>
     </MenuBar>
     <fx:include fx:id="submissionView" source="SubmissionView.fxml" />
