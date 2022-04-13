@@ -98,7 +98,7 @@
          </padding>
          <Label focusTraversable="false" styleClass="section-heading" text="Feedback" />
          <TextArea id="commentsTextArea" fx:id="commentsTextArea" prefHeight="400.0" prefWidth="200.0" wrapText="true" />
-         <Button mnemonicParsing="false" onAction="#saveMarks" text="Save" />
+         <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveMarks" text="Save" />
       </VBox>
       <Separator prefWidth="200.0" />
       <VBox alignment="CENTER">

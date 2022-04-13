@@ -5,6 +5,9 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import models.InstructorModel;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,18 +56,24 @@ public class InstructorController {
     }
 
     @FXML
-    void setExportDirectory() {
-        submissionViewController.setExportDirectory();
+    void setImportDirectory() {
+        submissionViewController.setImportDirectory();
     }
 
     @FXML
-    void setImportDirectory() {
-        submissionViewController.setImportDirectory();
+    void setExportDirectory() {
+        submissionViewController.setExportDirectory();
     }
 
     @FXML
     void exitApplication(){
         DialogController dialogController = new DialogController();
         dialogController.displayDialog("ExitApplicationDialogView.fxml", "Exit Application");
+    }
+
+    @FXML
+    void openHelpDoc() throws IOException {
+        File htmlFile = new File("src/main/resources/documentation/help.html");
+        Desktop.getDesktop().browse(htmlFile.toURI());
     }
 }
