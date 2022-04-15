@@ -27,6 +27,11 @@
     -fx-font-family: Consolas;
 }
 
+.keyword {
+    -fx-fill: purple;
+    -fx-font-weight: bold;
+}
+
 .tree-cell:selected {
     -fx-font-weight: bold;
 }
@@ -40,12 +45,13 @@
     -fx-text-fill: LimeGreen;
     /*#769fcd*/
     -fx-font-style: italic;
-    -fx-font-weight: bolder;
+    -fx-font-weight: bold;
 }
 
 .tree-cell:graded-tree-item:selected {
     -fx-text-fill: #FFFFFF;
 }
+
 
 
 /*colour palette*/

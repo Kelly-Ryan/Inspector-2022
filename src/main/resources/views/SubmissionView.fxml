@@ -57,7 +57,7 @@
       </HBox>
    </VBox>
    <VBox alignment="TOP_CENTER" minWidth="700.0" prefHeight="741.0" prefWidth="918.0">
-      <ScrollPane fx:id="sourceCodeScrollPane" focusTraversable="false" hbarPolicy="ALWAYS" minWidth="600.0" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
+      <ScrollPane fx:id="sourceCodeScrollPane" fitToHeight="true" fitToWidth="true" focusTraversable="false" hbarPolicy="ALWAYS" minWidth="600.0" pannable="true" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
    </VBox>
    <VBox alignment="TOP_CENTER" maxHeight="730.0" minWidth="250.0">
       <HBox alignment="CENTER" prefWidth="200.0">

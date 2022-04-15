@@ -60,6 +60,7 @@ public class DialogController {
     private void closeProgram(ActionEvent e) {
         e.consume();
         stage.close();
+        DialogController.submissionController.executorService.shutdownNow();
         Platform.exit();
     }
 }

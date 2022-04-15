@@ -61,7 +61,7 @@ public class InstructorController {
 
     @FXML
     void exitApplication(){
-        DialogController dialogController = new DialogController();
+        DialogController dialogController = new DialogController(submissionViewController);
         dialogController.displayDialog("ExitApplicationDialogView.fxml", "Exit Application");
     }
 

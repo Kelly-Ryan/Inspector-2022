@@ -1,6 +1,8 @@
 package controllers;
 
+import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
+import javafx.css.Style;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -22,20 +24,31 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.reactfx.Subscription;
 
 public class SubmissionController {
     AlertController alertController = new AlertController();
+    ExecutorService executorService;
     private InstructorModel instructor;
-    private File importDirectory, resultsDirectory;
+    private File importDirectory, resultsDirectory, currentFile;
     private SubmissionModel currentSubmission;
+    private static Pattern languagePattern;
     private CodeArea codeArea;
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
@@ -49,6 +62,102 @@ public class SubmissionController {
     @FXML private TextArea commentsTextArea;
     @FXML private TextField moduleCodeTextField;
     @FXML private TextField assignmentCodeTextField;
+
+    private static final String[] C_KEYWORDS = new String[] {
+            "auto", "break", "case", "char", "const", "continue",
+            "default", "do", "double", "else", "enum", "extern",
+            "float", "for", "goto", "if", "inline", "int", "long",
+            "register", "restrict", "return", "short", "signed",
+            "sizeof", "static", "struct", "switch", "typdef",
+            "union", "unsigned", "void", "volatile", "while"
+    };
+
+    private static final String[] JAVA_KEYWORDS = new String[] {
+            "abstract", "assert", "boolean", "break", "byte",
+            "case", "catch", "char", "class", "const",
+            "continue", "default", "do", "double", "else",
+            "enum", "extends", "final", "finally", "float",
+            "for", "goto", "if", "implements", "import",
+            "instanceof", "int", "interface", "long", "native",
+            "new", "package", "private", "protected", "public",
+            "return", "short", "static", "strictfp", "super",
+            "switch", "synchronized", "this", "throw", "throws",
+            "transient", "try", "void", "volatile", "while"
+    };
+
+    private static final String[] JULIA_KEYWORDS = new String[] {
+            "baremodule", "begin", "break", "catch", "const",
+            "continue", "do", "else", "elseif", "end", "export",
+            "false", "finally", "for", "function", "global",
+            "if", "import", "let", "local", "macro", "module",
+            "quote", "return", "struct", "true", "try", "using",
+            "while"
+    };
+
+    private static final String[] PYTHON_KEYWORDS = new String[] {
+            "and", "as", "assert", "break", "class", "continue",
+            "def", "del", "elif", "else", "except", "False",
+            "finally", "for", "from", "global", "if", "import",
+            "in", "is", "lambda", "None", "nonlocal", "not", "or",
+            "pass", "raise", "return", "True", "try", "while",
+            "with", "yield"
+    };
+
+    private static final String C_KEYWORD_PATTERN = "\\b(" + String.join("|", C_KEYWORDS) + ")\\b";
+    private static final String JAVA_KEYWORD_PATTERN = "\\b(" + String.join("|", JAVA_KEYWORDS) + ")\\b";
+    private static final String JULIA_KEYWORD_PATTERN = "\\b(" + String.join("|", JULIA_KEYWORDS) + ")\\b";
+    private static final String PYTHON_KEYWORD_PATTERN = "\\b(" + String.join("|", PYTHON_KEYWORDS) + ")\\b";
+
+    private static final String PARENTHESES_PATTERN = "\\(|\\)";
+    private static final String BRACE_PATTERN = "\\{|\\}";
+    private static final String BRACKET_PATTERN = "\\[|\\]";
+    private static final String SEMICOLON_PATTERN = "\\;";
+    private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
+    private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
+
+    private static final Pattern C_PATTERN = Pattern.compile(
+            "(?<KEYWORD>" + C_KEYWORD_PATTERN + ")"
+                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                    + "|(?<STRING>" + STRING_PATTERN + ")"
+                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+            Pattern.MULTILINE
+    );
+
+    private static final Pattern JAVA_PATTERN = Pattern.compile(
+            "(?<KEYWORD>" + JAVA_KEYWORD_PATTERN + ")"
+                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                    + "|(?<STRING>" + STRING_PATTERN + ")"
+                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+            Pattern.MULTILINE
+    );
+
+    private static final Pattern JULIA_PATTERN = Pattern.compile(
+            "(?<KEYWORD>" + JULIA_KEYWORD_PATTERN + ")"
+                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                    + "|(?<STRING>" + STRING_PATTERN + ")"
+                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+            Pattern.MULTILINE
+    );
+
+    private static final Pattern PYTHON_PATTERN = Pattern.compile(
+            "(?<KEYWORD>" + PYTHON_KEYWORD_PATTERN + ")"
+                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                    + "|(?<STRING>" + STRING_PATTERN + ")"
+                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+            Pattern.MULTILINE
+    );
 
     void initializeListeners() {
         Scene scene = treeView.getScene();
@@ -283,14 +392,80 @@ public class SubmissionController {
     }
 
     void setUpSourceCodeDisplay() {
+        executorService = Executors.newSingleThreadExecutor();
         codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         codeArea.setEditable(false);
-        codeArea.setFocusTraversable(false);
+        codeArea.setFocusTraversable(true);
         codeArea.setMinWidth(1200);
         codeArea.setMinHeight(700);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+
+        Subscription subscription = codeArea.multiPlainChanges()
+                .successionEnds(Duration.ofMillis(500))
+                .retainLatestUntilLater(executorService)
+                .supplyTask(this::computeHighlightingAsync)
+                .awaitLatest(codeArea.multiPlainChanges())
+                .filterMap(t -> {
+                    if(t.isSuccess()) {
+                        return Optional.of(t.get());
+                    } else {
+                        t.getFailure().printStackTrace();
+                        return Optional.empty();
+                    }
+                })
+                .subscribe(this::applyHighlighting);
+
         sourceCodeScrollPane.setContent(codeArea);
+    }
+
+    private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
+        String sourceCode = codeArea.getText();
+        Task<StyleSpans<Collection<String>>> task = new Task<>() {
+            @Override
+            protected StyleSpans<Collection<String>> call() {
+                return computeHighlighting(sourceCode);
+            }
+        };
+        executorService.execute(task);
+        return task;
+    }
+
+    private Pattern patternChooser() {
+        Pattern patt = Pattern.compile("a^");
+        if(currentFile.toString().endsWith(".c")) {
+            patt = C_PATTERN;
+
+        } else if (currentFile.toString().endsWith(".java")) {
+            patt = JAVA_PATTERN;
+
+        } else if (currentFile.toString().endsWith(".jl")) {
+            patt = JULIA_PATTERN;
+
+        } else if (currentFile.toString().endsWith(".py")) {
+            patt = PYTHON_PATTERN;
+        }
+
+        return patt;
+    }
+
+    private static StyleSpans<Collection<String>> computeHighlighting(String sourceCode) {
+        Matcher matcher = languagePattern.matcher(sourceCode);
+        int lastKwEnd = 0;
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+
+        while(matcher.find()) {
+            String styleClass = "keyword";
+            spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
+            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+            lastKwEnd = matcher.end();
+        }
+        spansBuilder.add(Collections.emptyList(), sourceCode.length() - lastKwEnd);
+        return spansBuilder.create();
+    }
+
+    private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
+        codeArea.setStyleSpans(0, highlighting);
     }
 
     //displays submission text, grading rubric and saved marks and creates Submission object to hold submission info
@@ -299,7 +474,7 @@ public class SubmissionController {
         criteriaList.clear();
         marksList.clear();
 
-        File file = treeItem.getValue();
+        currentFile = treeItem.getValue();
 
         String studentIdDir = treeItem.getParent().getValue().toString();
         String assignmentDir = treeItem.getParent().getParent().getValue().toString();
@@ -314,7 +489,7 @@ public class SubmissionController {
             pstmt.setString(2, moduleDir);
             pstmt.setString(3, assignmentDir);
             pstmt.setString(4, studentIdDir);
-            pstmt.setString(5, file.toString());
+            pstmt.setString(5, currentFile.toString());
             ResultSet rs = pstmt.executeQuery();
             submissionText = rs.getString(1);
             conn.close();
@@ -326,6 +501,8 @@ public class SubmissionController {
         loadGradingRubric();
         loadMarksReceived();
         loadComments();
+
+        languagePattern = patternChooser();
 
         return submissionText;
     }
