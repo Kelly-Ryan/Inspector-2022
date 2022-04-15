@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class DialogController {
-    private static SubmissionController submissionController;
+    private static MainViewController mainViewController;
     private static Stage stage;
     private Parent root = null;
 
@@ -22,8 +22,8 @@ public class DialogController {
 
     }
 
-    public DialogController(SubmissionController submissionController) {
-        DialogController.submissionController = submissionController;
+    public DialogController(MainViewController mainViewController) {
+        DialogController.mainViewController = mainViewController;
     }
 
     public void displayDialog(String view, String title) {
@@ -47,7 +47,7 @@ public class DialogController {
 
     public void setGradingRubric() {
         stage.close();
-        DialogController.submissionController.setGradingRubric();
+        DialogController.mainViewController.setGradingRubric();
     }
 
     @FXML
@@ -60,7 +60,7 @@ public class DialogController {
     private void closeProgram(ActionEvent e) {
         e.consume();
         stage.close();
-        DialogController.submissionController.executorService.shutdownNow();
+        DialogController.mainViewController.executorService.shutdownNow();
         Platform.exit();
     }
 }

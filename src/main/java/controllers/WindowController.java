@@ -13,14 +13,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class InstructorController {
-    InstructorController instructorController;
+public class WindowController {
+    WindowController windowController;
     public InstructorModel instructor;
-    @FXML private Parent submissionView;
-    @FXML SubmissionController submissionViewController;
+    @FXML private Parent mainView;
+    @FXML MainViewController mainViewController;
 
-    void setup(InstructorController instructorController, String email) throws IOException, SQLException {
-        this.instructorController = instructorController;
+    void setup(WindowController windowController, String email) throws IOException, SQLException {
+        this.windowController = windowController;
 
         //sql query to initialize InstructorModel object
         Connection conn = DatabaseController.dbConnect();
@@ -37,31 +37,31 @@ public class InstructorController {
 
         // set instructor info
         instructor = new InstructorModel(instructorId, name, email, importDirectory, resultsDirectory, lastUsedRubric);
-        submissionViewController.setInstructor(instructor);
+        mainViewController.setInstructor(instructor);
 
         // prepare source code display area
-        submissionViewController.setUpSourceCodeDisplay();
+        mainViewController.setUpSourceCodeDisplay();
 
         // set key listener
-        submissionViewController.initializeListeners();
+        mainViewController.initializeListeners();
 
         // import files
-        submissionViewController.displayFileTree(submissionViewController.treeView);
+        mainViewController.displayFileTree(mainViewController.treeView);
     }
 
     @FXML
     void setImportDirectory() throws IOException {
-        submissionViewController.setImportDirectory();
+        mainViewController.setImportDirectory();
     }
 
     @FXML
     void setExportDirectory() {
-        submissionViewController.setExportDirectory();
+        mainViewController.setExportDirectory();
     }
 
     @FXML
     void exitApplication(){
-        DialogController dialogController = new DialogController(submissionViewController);
+        DialogController dialogController = new DialogController(mainViewController);
         dialogController.displayDialog("ExitApplicationDialogView.fxml", "Exit Application");
     }
 

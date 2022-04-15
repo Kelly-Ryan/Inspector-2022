@@ -2,7 +2,6 @@ package controllers;
 
 import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
-import javafx.css.Style;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -33,16 +32,14 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.reactfx.Subscription;
 
-public class SubmissionController {
+public class MainViewController {
     AlertController alertController = new AlertController();
     ExecutorService executorService;
     private InstructorModel instructor;
@@ -396,27 +393,26 @@ public class SubmissionController {
         codeArea = new CodeArea();
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         codeArea.setEditable(false);
-        codeArea.setFocusTraversable(true);
-        codeArea.setMinWidth(1200);
+        codeArea.setFocusTraversable(false);
+        codeArea.setMinWidth(900);
         codeArea.setMinHeight(700);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-
-        Subscription subscription = codeArea.multiPlainChanges()
-                .successionEnds(Duration.ofMillis(500))
-                .retainLatestUntilLater(executorService)
-                .supplyTask(this::computeHighlightingAsync)
-                .awaitLatest(codeArea.multiPlainChanges())
-                .filterMap(t -> {
-                    if(t.isSuccess()) {
-                        return Optional.of(t.get());
-                    } else {
-                        t.getFailure().printStackTrace();
-                        return Optional.empty();
-                    }
-                })
-                .subscribe(this::applyHighlighting);
-
         sourceCodeScrollPane.setContent(codeArea);
+
+        codeArea.multiPlainChanges()
+        .successionEnds(Duration.ofMillis(500))
+        .retainLatestUntilLater(executorService)
+        .supplyTask(this::computeHighlightingAsync)
+        .awaitLatest(codeArea.multiPlainChanges())
+        .filterMap(t -> {
+            if(t.isSuccess()) {
+                return Optional.of(t.get());
+            } else {
+                t.getFailure().printStackTrace();
+                return Optional.empty();
+            }
+        })
+        .subscribe(this::applyHighlighting);
     }
 
     private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
