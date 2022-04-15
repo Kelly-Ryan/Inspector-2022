@@ -7,7 +7,7 @@
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InstructorController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.WindowController">
     <MenuBar>
         <Menu text="_File">
          <MenuItem id="setImportDirMenuItem" onAction="#setImportDirectory" text="set _import directory...">
@@ -39,5 +39,5 @@
             </accelerator></MenuItem>
         </Menu>
     </MenuBar>
-    <fx:include fx:id="submissionView" source="SubmissionView.fxml" />
+    <fx:include fx:id="mainView" source="MainView.fxml" />
 </VBox>

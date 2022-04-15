@@ -50,7 +50,7 @@ public class LoginController {
                         loginPasswordField.setText(null);
 
                         // create new scene root
-                        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/InstructorView.fxml")));
+                        FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getClassLoader().getResource("views/WindowView.fxml")));
                         Parent newRoot = loader.load();
                         //get current scene
                         Scene scene = loginEmailField.getScene();
@@ -58,8 +58,8 @@ public class LoginController {
                         scene.setRoot(newRoot);
 
                         // get controller for current scene
-                        InstructorController instructorController = loader.getController();
-                        instructorController.setup(instructorController, email);
+                        WindowController windowController = loader.getController();
+                        windowController.setup(windowController, email);
                     } else {
                         alertController.displayAlert(alertController.incorrectPassword());
                     }
