@@ -43,13 +43,17 @@
 
 .tree-cell:graded-tree-item {
     -fx-text-fill: LimeGreen;
-    /*#769fcd*/
     -fx-font-style: italic;
     -fx-font-weight: bold;
 }
 
 .tree-cell:graded-tree-item:selected {
     -fx-text-fill: #FFFFFF;
+}
+
+.warning {
+    -fx-text-fill: #FF0000;
+    -fx-font-size: small;
 }
 
 

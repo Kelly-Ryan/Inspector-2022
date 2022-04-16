@@ -49,7 +49,9 @@ public class MainViewController {
     private CodeArea codeArea;
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
+    @FXML private Label importDirNotSetWarningLabel;
     @FXML private Label username;
+    @FXML private Label languageLabel;
     @FXML private ScrollPane sourceCodeScrollPane;
     @FXML TreeView<File> treeView;
     @FXML VBox rubricVBox;
@@ -59,6 +61,7 @@ public class MainViewController {
     @FXML private TextArea commentsTextArea;
     @FXML private TextField moduleCodeTextField;
     @FXML private TextField assignmentCodeTextField;
+    @FXML private Label exportDirNotSetWarningLabel;
 
     private static final String[] C_KEYWORDS = new String[] {
             "auto", "break", "case", "char", "const", "continue",
@@ -195,8 +198,13 @@ public class MainViewController {
 
         if(instructor.getImportDirectory() == null) {
             importDirectory = new File("");
+            importDirNotSetWarningLabel.setText("Import directory not set!");
         } else {
             importDirectory = new File(instructor.getImportDirectory());
+        }
+
+        if(resultsDirectory == null) {
+            exportDirNotSetWarningLabel.setText("Export directory not set!");
         }
     }
 
@@ -213,6 +221,9 @@ public class MainViewController {
                 pstmt.setString(2, instructor.getEmail());
                 pstmt.execute();
                 conn.close();
+
+                importDirNotSetWarningLabel.setText("");
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -429,17 +440,23 @@ public class MainViewController {
 
     private Pattern patternChooser() {
         Pattern patt = Pattern.compile("a^");
-        if(currentFile.toString().endsWith(".c")) {
+        if(currentFile.toString().endsWith(".c") || currentFile.toString().endsWith(".h")) {
+            languageLabel.setText("Language: C");
             patt = C_PATTERN;
 
         } else if (currentFile.toString().endsWith(".java")) {
+            languageLabel.setText("Language: Java");
             patt = JAVA_PATTERN;
 
         } else if (currentFile.toString().endsWith(".jl")) {
+            languageLabel.setText("Language: Julia");
             patt = JULIA_PATTERN;
 
         } else if (currentFile.toString().endsWith(".py")) {
+            languageLabel.setText("Language: Python");
             patt = PYTHON_PATTERN;
+        } else {
+            languageLabel.setText("Language: unknown");
         }
 
         return patt;
@@ -763,6 +780,9 @@ public class MainViewController {
                 pstmt.setString(2, instructor.getEmail());
                 pstmt.execute();
                 conn.close();
+
+                exportDirNotSetWarningLabel.setText("");
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
