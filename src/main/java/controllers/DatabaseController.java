@@ -1,5 +1,7 @@
 package controllers;
 
+import org.sqlite.SQLiteDataSource;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -9,10 +11,12 @@ public class DatabaseController {
 
     public static Connection dbConnect() {
         try {
-            Class.forName("org.sqlite.JDBC");
             //create database if it does not already exist and connect to it
-            conn = DriverManager.getConnection("jdbc:sqlite:src/main/resources/db/inspector.db");
-            //conn = DriverManager.getConnection("jdbc:sqlite:src/main/resources/db/inspector.db");
+            Class.forName("org.sqlite.JDBC");
+            String url = "jdbc:sqlite::resource:db/inspector.db";
+            SQLiteDataSource dataSource = new SQLiteDataSource();
+            dataSource.setUrl(url);
+            conn = dataSource.getConnection();
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);

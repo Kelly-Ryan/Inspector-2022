@@ -60,7 +60,12 @@ public class DialogController {
     private void closeProgram(ActionEvent e) {
         e.consume();
         stage.close();
-        DialogController.mainViewController.executorService.shutdownNow();
-        Platform.exit();
+        try{
+            DialogController.mainViewController.executorService.shutdownNow();
+        } catch (NullPointerException ignored) {
+
+        } finally {
+            Platform.exit();
+        }
     }
 }
