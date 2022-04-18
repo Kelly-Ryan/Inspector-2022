@@ -66,8 +66,14 @@ public class WindowController {
     }
 
     @FXML
-    void openHelpDoc() throws IOException {
-        File htmlFile = new File("src/main/resources/documentation/help.html");
+    void openUserManual() throws IOException {
+        File htmlFile = new File("src/main/resources/documentation/usermanual.html");
+        Desktop.getDesktop().browse(htmlFile.toURI());
+    }
+
+    @FXML
+    void openAboutDoc() throws IOException {
+        File htmlFile = new File("src/main/resources/documentation/about.html");
         Desktop.getDesktop().browse(htmlFile.toURI());
     }
 }

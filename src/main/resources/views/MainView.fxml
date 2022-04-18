@@ -53,7 +53,7 @@
          <Button mnemonicParsing="false" onAction="#addCriterion" text="Add" />
       </HBox>
    </VBox>
-   <VBox alignment="TOP_CENTER" minWidth="700.0" prefHeight="741.0" prefWidth="918.0">
+   <VBox fx:id="sourceCodeVBox" alignment="TOP_CENTER" minWidth="700.0" prefHeight="741.0" prefWidth="918.0">
       <HBox styleClass="section-heading">
          <children>
             <Label fx:id="languageLabel" />
@@ -62,7 +62,6 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
          </VBox.margin>
       </HBox>
-      <ScrollPane fx:id="sourceCodeScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" minWidth="600.0" prefHeight="687.0" prefViewportHeight="500.0" prefViewportWidth="900.0" prefWidth="917.0" vbarPolicy="ALWAYS" />
    </VBox>
    <VBox alignment="TOP_CENTER" maxHeight="730.0" minWidth="250.0">
       <HBox alignment="CENTER" prefWidth="200.0">
