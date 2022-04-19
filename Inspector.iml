@@ -9,7 +9,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
-      <excludeFolder url="file://$MODULE_DIR$/target/classes" />
     </content>
     <content url="file://$MODULE_DIR$/target/classes" />
     <orderEntry type="inheritedJdk" />
