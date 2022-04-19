@@ -34,6 +34,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.Caret;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
@@ -49,8 +51,10 @@ public class MainViewController {
     private CodeArea codeArea;
     private final List<HBox> criteriaList = new ArrayList<>();        //stores rubric info
     private final List<TextField> marksList = new ArrayList<>();      //used by updateTotalMarks()
+    private VirtualizedScrollPane<CodeArea> virtualizedScrollPane;
+    @FXML private Label importDirNotSetWarningLabel;
     @FXML private Label username;
-    @FXML private ScrollPane sourceCodeScrollPane;
+    @FXML private Label languageLabel;
     @FXML TreeView<File> treeView;
     @FXML VBox rubricVBox;
     @FXML VBox marksVBox;
@@ -59,102 +63,8 @@ public class MainViewController {
     @FXML private TextArea commentsTextArea;
     @FXML private TextField moduleCodeTextField;
     @FXML private TextField assignmentCodeTextField;
-
-    private static final String[] C_KEYWORDS = new String[] {
-            "auto", "break", "case", "char", "const", "continue",
-            "default", "do", "double", "else", "enum", "extern",
-            "float", "for", "goto", "if", "inline", "int", "long",
-            "register", "restrict", "return", "short", "signed",
-            "sizeof", "static", "struct", "switch", "typdef",
-            "union", "unsigned", "void", "volatile", "while"
-    };
-
-    private static final String[] JAVA_KEYWORDS = new String[] {
-            "abstract", "assert", "boolean", "break", "byte",
-            "case", "catch", "char", "class", "const",
-            "continue", "default", "do", "double", "else",
-            "enum", "extends", "final", "finally", "float",
-            "for", "goto", "if", "implements", "import",
-            "instanceof", "int", "interface", "long", "native",
-            "new", "package", "private", "protected", "public",
-            "return", "short", "static", "strictfp", "super",
-            "switch", "synchronized", "this", "throw", "throws",
-            "transient", "try", "void", "volatile", "while"
-    };
-
-    private static final String[] JULIA_KEYWORDS = new String[] {
-            "baremodule", "begin", "break", "catch", "const",
-            "continue", "do", "else", "elseif", "end", "export",
-            "false", "finally", "for", "function", "global",
-            "if", "import", "let", "local", "macro", "module",
-            "quote", "return", "struct", "true", "try", "using",
-            "while"
-    };
-
-    private static final String[] PYTHON_KEYWORDS = new String[] {
-            "and", "as", "assert", "break", "class", "continue",
-            "def", "del", "elif", "else", "except", "False",
-            "finally", "for", "from", "global", "if", "import",
-            "in", "is", "lambda", "None", "nonlocal", "not", "or",
-            "pass", "raise", "return", "True", "try", "while",
-            "with", "yield"
-    };
-
-    private static final String C_KEYWORD_PATTERN = "\\b(" + String.join("|", C_KEYWORDS) + ")\\b";
-    private static final String JAVA_KEYWORD_PATTERN = "\\b(" + String.join("|", JAVA_KEYWORDS) + ")\\b";
-    private static final String JULIA_KEYWORD_PATTERN = "\\b(" + String.join("|", JULIA_KEYWORDS) + ")\\b";
-    private static final String PYTHON_KEYWORD_PATTERN = "\\b(" + String.join("|", PYTHON_KEYWORDS) + ")\\b";
-
-    private static final String PARENTHESES_PATTERN = "\\(|\\)";
-    private static final String BRACE_PATTERN = "\\{|\\}";
-    private static final String BRACKET_PATTERN = "\\[|\\]";
-    private static final String SEMICOLON_PATTERN = "\\;";
-    private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
-    private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
-
-    private static final Pattern C_PATTERN = Pattern.compile(
-            "(?<KEYWORD>" + C_KEYWORD_PATTERN + ")"
-                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
-                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
-                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
-                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
-                    + "|(?<STRING>" + STRING_PATTERN + ")"
-                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
-            Pattern.MULTILINE
-    );
-
-    private static final Pattern JAVA_PATTERN = Pattern.compile(
-            "(?<KEYWORD>" + JAVA_KEYWORD_PATTERN + ")"
-                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
-                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
-                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
-                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
-                    + "|(?<STRING>" + STRING_PATTERN + ")"
-                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
-            Pattern.MULTILINE
-    );
-
-    private static final Pattern JULIA_PATTERN = Pattern.compile(
-            "(?<KEYWORD>" + JULIA_KEYWORD_PATTERN + ")"
-                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
-                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
-                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
-                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
-                    + "|(?<STRING>" + STRING_PATTERN + ")"
-                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
-            Pattern.MULTILINE
-    );
-
-    private static final Pattern PYTHON_PATTERN = Pattern.compile(
-            "(?<KEYWORD>" + PYTHON_KEYWORD_PATTERN + ")"
-                    + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
-                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
-                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
-                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
-                    + "|(?<STRING>" + STRING_PATTERN + ")"
-                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
-            Pattern.MULTILINE
-    );
+    @FXML private Label exportDirNotSetWarningLabel;
+    @FXML private VBox sourceCodeVBox;
 
     void initializeListeners() {
         Scene scene = treeView.getScene();
@@ -163,6 +73,7 @@ public class MainViewController {
         KeyCombination ctrlE = new KeyCodeCombination(KeyCode.E, KeyCodeCombination.CONTROL_DOWN);
         KeyCombination ctrlA = new KeyCodeCombination(KeyCode.A, KeyCodeCombination.CONTROL_DOWN);
         KeyCombination ctrlR = new KeyCodeCombination(KeyCode.R, KeyCodeCombination.CONTROL_DOWN);
+        KeyCombination ctrlX = new KeyCodeCombination(KeyCode.X, KeyCodeCombination.CONTROL_DOWN);
 
         scene.setOnKeyReleased(event -> {
             if (ctrlS.match(event)) {
@@ -174,6 +85,9 @@ public class MainViewController {
             } else if (ctrlR.match(event)) {
                 modifyGradingRubric();
             }
+            else if (ctrlX.match(event)) {
+                setExportDirectory();
+            }
         });
 
         //display submission text when source code files are selected with arrow keys
@@ -183,6 +97,8 @@ public class MainViewController {
                 if (treeItem != null) {
                     if (treeItem.isLeaf()) {
                         codeArea.replaceText(0, 0, loadSubmission(treeItem));
+                        codeArea.displaceCaret(0);
+                        virtualizedScrollPane.scrollYToPixel(0);
                     }
                 }
             }
@@ -195,8 +111,13 @@ public class MainViewController {
 
         if(instructor.getImportDirectory() == null) {
             importDirectory = new File("");
+            importDirNotSetWarningLabel.setText("Import directory not set!");
         } else {
             importDirectory = new File(instructor.getImportDirectory());
+        }
+
+        if(resultsDirectory == null) {
+            exportDirNotSetWarningLabel.setText("Export directory not set!");
         }
     }
 
@@ -213,6 +134,9 @@ public class MainViewController {
                 pstmt.setString(2, instructor.getEmail());
                 pstmt.execute();
                 conn.close();
+
+                importDirNotSetWarningLabel.setText("");
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -251,6 +175,8 @@ public class MainViewController {
                     TreeItem<File> treeItem = cell.getTreeItem();
                     if (treeItem.isLeaf()) {
                         codeArea.replaceText(0, 0, loadSubmission(treeItem));
+                        codeArea.displaceCaret(0);
+                        virtualizedScrollPane.scrollYToPixel(0);
                     }
                 }
             });
@@ -394,10 +320,10 @@ public class MainViewController {
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         codeArea.setEditable(false);
         codeArea.setFocusTraversable(false);
-        codeArea.setMinWidth(900);
-        codeArea.setMinHeight(700);
+        codeArea.scrollBy(10, 10);
+        codeArea.setWrapText(true);
+        codeArea.setShowCaret(Caret.CaretVisibility.ON);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        sourceCodeScrollPane.setContent(codeArea);
 
         codeArea.multiPlainChanges()
         .successionEnds(Duration.ofMillis(500))
@@ -413,6 +339,131 @@ public class MainViewController {
             }
         })
         .subscribe(this::applyHighlighting);
+
+        virtualizedScrollPane = new VirtualizedScrollPane<>(codeArea);
+        virtualizedScrollPane.setMinSize(600, 650);
+        sourceCodeVBox.getChildren().add(virtualizedScrollPane);
+    }
+
+    private Pattern patternChooser() {
+        final String[] C_KEYWORDS = new String[] {
+                "auto", "break", "case", "char", "const", "continue",
+                "default", "do", "double", "else", "enum", "extern",
+                "float", "for", "goto", "if", "inline", "int", "long",
+                "register", "restrict", "return", "short", "signed",
+                "sizeof", "static", "struct", "switch", "typdef",
+                "union", "unsigned", "void", "volatile", "while"
+        };
+
+        final String[] JAVA_KEYWORDS = new String[] {
+                "abstract", "assert", "boolean", "break", "byte",
+                "case", "catch", "char", "class", "const",
+                "continue", "default", "do", "double", "else",
+                "enum", "extends", "final", "finally", "float",
+                "for", "goto", "if", "implements", "import",
+                "instanceof", "int", "interface", "long", "native",
+                "new", "package", "private", "protected", "public",
+                "return", "short", "static", "strictfp", "super",
+                "switch", "synchronized", "this", "throw", "throws",
+                "transient", "try", "void", "volatile", "while"
+        };
+
+        final String[] JULIA_KEYWORDS = new String[] {
+                "baremodule", "begin", "break", "catch", "const",
+                "continue", "do", "else", "elseif", "end", "export",
+                "false", "finally", "for", "function", "global",
+                "if", "import", "let", "local", "macro", "module",
+                "quote", "return", "struct", "true", "try", "using",
+                "while"
+        };
+
+        final String[] PYTHON_KEYWORDS = new String[] {
+                "and", "as", "assert", "break", "class", "continue",
+                "def", "del", "elif", "else", "except", "False",
+                "finally", "for", "from", "global", "if", "import",
+                "in", "is", "lambda", "None", "nonlocal", "not", "or",
+                "pass", "raise", "return", "True", "try", "while",
+                "with", "yield"
+        };
+
+        final String C_KEYWORD_PATTERN = "\\b(" + String.join("|", C_KEYWORDS) + ")\\b";
+        final String JAVA_KEYWORD_PATTERN = "\\b(" + String.join("|", JAVA_KEYWORDS) + ")\\b";
+        final String JULIA_KEYWORD_PATTERN = "\\b(" + String.join("|", JULIA_KEYWORDS) + ")\\b";
+        final String PYTHON_KEYWORD_PATTERN = "\\b(" + String.join("|", PYTHON_KEYWORDS) + ")\\b";
+
+        final String PARENTHESES_PATTERN = "\\(|\\)";
+        final String BRACE_PATTERN = "\\{|\\}";
+        final String BRACKET_PATTERN = "\\[|\\]";
+        final String SEMICOLON_PATTERN = "\\;";
+        final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
+        final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
+
+        final Pattern C_PATTERN = Pattern.compile(
+                "(?<KEYWORD>" + C_KEYWORD_PATTERN + ")"
+                        + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                        + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                        + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                        + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                        + "|(?<STRING>" + STRING_PATTERN + ")"
+                        + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+                Pattern.MULTILINE
+        );
+
+        final Pattern JAVA_PATTERN = Pattern.compile(
+                "(?<KEYWORD>" + JAVA_KEYWORD_PATTERN + ")"
+                        + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                        + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                        + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                        + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                        + "|(?<STRING>" + STRING_PATTERN + ")"
+                        + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+                Pattern.MULTILINE
+        );
+
+        final Pattern JULIA_PATTERN = Pattern.compile(
+                "(?<KEYWORD>" + JULIA_KEYWORD_PATTERN + ")"
+                        + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                        + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                        + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                        + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                        + "|(?<STRING>" + STRING_PATTERN + ")"
+                        + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+                Pattern.MULTILINE
+        );
+
+        final Pattern PYTHON_PATTERN = Pattern.compile(
+                "(?<KEYWORD>" + PYTHON_KEYWORD_PATTERN + ")"
+                        + "|(?<PAREN>" + PARENTHESES_PATTERN + ")"
+                        + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                        + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+                        + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
+                        + "|(?<STRING>" + STRING_PATTERN + ")"
+                        + "|(?<COMMENT>" + COMMENT_PATTERN + ")",
+                Pattern.MULTILINE
+        );
+
+
+        Pattern patt = Pattern.compile("a^");
+        if(currentFile.toString().endsWith(".c") || currentFile.toString().endsWith(".h")) {
+            languageLabel.setText("Language: C");
+            patt = C_PATTERN;
+
+        } else if (currentFile.toString().endsWith(".java")) {
+            languageLabel.setText("Language: Java");
+            patt = JAVA_PATTERN;
+
+        } else if (currentFile.toString().endsWith(".jl")) {
+            languageLabel.setText("Language: Julia");
+            patt = JULIA_PATTERN;
+
+        } else if (currentFile.toString().endsWith(".py")) {
+            languageLabel.setText("Language: Python");
+            patt = PYTHON_PATTERN;
+        } else {
+            languageLabel.setText("Language: unknown");
+        }
+
+        return patt;
     }
 
     private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
@@ -425,24 +476,6 @@ public class MainViewController {
         };
         executorService.execute(task);
         return task;
-    }
-
-    private Pattern patternChooser() {
-        Pattern patt = Pattern.compile("a^");
-        if(currentFile.toString().endsWith(".c")) {
-            patt = C_PATTERN;
-
-        } else if (currentFile.toString().endsWith(".java")) {
-            patt = JAVA_PATTERN;
-
-        } else if (currentFile.toString().endsWith(".jl")) {
-            patt = JULIA_PATTERN;
-
-        } else if (currentFile.toString().endsWith(".py")) {
-            patt = PYTHON_PATTERN;
-        }
-
-        return patt;
     }
 
     private static StyleSpans<Collection<String>> computeHighlighting(String sourceCode) {
@@ -610,7 +643,7 @@ public class MainViewController {
         }
 
         currentSubmission.setTotalMarks(totalMarks);
-        marksReceivedLabel.setText("Total marks: " + currentSubmission.getTotalMarks());
+        marksReceivedLabel.setText("Total Marks: " + currentSubmission.getTotalMarks());
     }
 
     void parseGradingRubric(String rubricString) {
@@ -763,6 +796,9 @@ public class MainViewController {
                 pstmt.setString(2, instructor.getEmail());
                 pstmt.execute();
                 conn.close();
+
+                exportDirNotSetWarningLabel.setText("");
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -776,7 +812,15 @@ public class MainViewController {
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HH_mm_ss_");
         LocalDateTime now = LocalDateTime.now();
-        String csvFile = resultsDirectory + "\\" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+        String csvFile;
+
+
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            csvFile = resultsDirectory + "\\" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+        } else {
+            csvFile = resultsDirectory + "//" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+        }
 
         Connection conn = DatabaseController.dbConnect();
         String sql = "SELECT moduleId, assignmentId, studentId, studentEmail, gradingRubric, marksReceived, maxMarks, " +

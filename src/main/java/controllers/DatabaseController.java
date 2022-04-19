@@ -67,7 +67,7 @@ public class DatabaseController {
                     "marksReceived VARCHAR(250) DEFAULT  'marks not set'," +
                     "maxMarks       FLOAT DEFAULT 0.0," +
                     "totalMarks     FLOAT DEFAULT 0.0," +
-                    "comments       VARCHAR(1000) DEFAULT 'no comments'," +
+                    "comments       VARCHAR(1000)," +
                     "CONSTRAINT COMP_KEY PRIMARY KEY (instructorId, moduleId, assignmentId, studentId)" +
                     ");" +
                     "CREATE TABLE IF NOT EXISTS SUBMISSION_FILES (" +

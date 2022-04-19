@@ -28,12 +28,12 @@
          </accelerator>
         </Menu>
         <Menu mnemonicParsing="false" text="_Help">
-         <MenuItem onAction="#openHelpDoc" text="_User Manual">
+         <MenuItem onAction="#openUserManual" text="_User Manual">
             <accelerator>
                <KeyCodeCombination alt="DOWN" code="U" control="UP" meta="UP" shift="UP" shortcut="UP" />
             </accelerator>
          </MenuItem>
-            <MenuItem text="_About">
+            <MenuItem onAction="#openAboutDoc" text="_About">
             <accelerator>
                <KeyCodeCombination alt="ANY" code="A" control="UP" meta="UP" shift="UP" shortcut="UP" />
             </accelerator></MenuItem>
