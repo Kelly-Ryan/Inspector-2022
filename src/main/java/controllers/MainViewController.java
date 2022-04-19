@@ -812,7 +812,15 @@ public class MainViewController {
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HH_mm_ss_");
         LocalDateTime now = LocalDateTime.now();
-        String csvFile = resultsDirectory + "\\" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+        String csvFile;
+
+
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            csvFile = resultsDirectory + "\\" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+        } else {
+            csvFile = resultsDirectory + "//" + dtf.format(now) + module + "_" + assignment +"_results.csv";
+        }
 
         Connection conn = DatabaseController.dbConnect();
         String sql = "SELECT moduleId, assignmentId, studentId, studentEmail, gradingRubric, marksReceived, maxMarks, " +
