@@ -11,7 +11,7 @@ public class DatabaseController {
 
     public static Connection dbConnect() {
         try {
-            //create database if it does not already exist and connect to it
+            //connect to database
             Class.forName("org.sqlite.JDBC");
             String url = "jdbc:sqlite::resource:db/inspector.db";
             SQLiteDataSource dataSource = new SQLiteDataSource();
