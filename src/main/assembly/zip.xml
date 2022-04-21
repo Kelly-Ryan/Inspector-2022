@@ -16,5 +16,8 @@
         <fileSet>
             <directory>${basedir}/src/main/resources/documentation</directory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/db</directory>
+        </fileSet>
     </fileSets>
 </assembly>

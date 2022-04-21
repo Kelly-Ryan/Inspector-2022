@@ -13,10 +13,7 @@ public class DatabaseController {
         try {
             //connect to database
             Class.forName("org.sqlite.JDBC");
-            String url = "jdbc:sqlite::resource:db/inspector.db";
-            SQLiteDataSource dataSource = new SQLiteDataSource();
-            dataSource.setUrl(url);
-            conn = dataSource.getConnection();
+            conn = DriverManager.getConnection("jdbc:sqlite:src/main/resources/db/inspector.db");
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
