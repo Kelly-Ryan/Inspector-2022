@@ -116,8 +116,10 @@ public class MainViewController {
             importDirectory = new File(instructor.getImportDirectory());
         }
 
-        if(resultsDirectory == null) {
+        if(instructor.getResultsDirectory() == null) {
             exportDirNotSetWarningLabel.setText("Export directory not set!");
+        } else {
+            resultsDirectory = new File(instructor.getResultsDirectory());
         }
     }
 
